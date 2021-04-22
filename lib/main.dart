@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:follow_me/speed.dart';
+import 'package:follow_me/inicio.dart';
 import 'package:http/http.dart' as http;
 import 'map.dart';
 import 'json.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Inicio(),
+  ));
 }
 
 class MyApp extends StatefulWidget {

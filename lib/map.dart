@@ -23,6 +23,7 @@ class _MapState extends State<Map> {
             // la Web view se basa mediante la data obtenida por la altura entre 2
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
+            // el mapa y sus caracteristicas
             child: GoogleMap(
               mapType: MapType.normal,
               zoomGesturesEnabled: true,
@@ -34,6 +35,7 @@ class _MapState extends State<Map> {
               },
             ),
           ),
+          //bar view, y sus elementos, tipos de vistas y alineaciones
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -55,7 +57,7 @@ class _MapState extends State<Map> {
                           ),
                         ),
                         Container(
-                          padding: EdgeInsets.only(left: 29, top: 10),
+                          padding: EdgeInsets.only(left: 28, top: 10),
                           alignment: Alignment.topCenter,
                           child: Column(
                             children: [
