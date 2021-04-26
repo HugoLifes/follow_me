@@ -35,12 +35,12 @@ class _MapState extends State<Map> {
               },
             ),
           ),
-          //bar view, y sus elementos, tipos de vistas y alineaciones
+          //bottom bar view, y sus elementos, tipos de vistas y alineaciones
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
-                height: MediaQuery.of(context).size.height / 3.4,
+                height: MediaQuery.of(context).size.height / 3,
                 width: MediaQuery.of(context).size.width / 1,
                 child: Card(
                   elevation: 4,
@@ -72,20 +72,22 @@ class _MapState extends State<Map> {
                           ),
                         ),
                         Container(
-                            padding: EdgeInsets.only(left: 110, top: 13),
+                            padding: EdgeInsets.only(left: 90, top: 13),
                             alignment: Alignment.centerLeft,
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Combustible',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                SizedBox(height: 15),
-                                speedO()
-                              ],
+                            child: Expanded(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Combustible',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  SizedBox(height: 15),
+                                  speedO(0, 'Litros'),
+                                ],
+                              ),
                             )),
                         Container(
                             padding: EdgeInsets.only(left: 110, top: 13),
@@ -104,7 +106,26 @@ class _MapState extends State<Map> {
                                           fontWeight: FontWeight.w400),
                                     ),
                                     SizedBox(height: 15),
-                                    speedO()
+                                    FutureBuilder<Post>(
+                                      future: widget.post,
+                                      builder:
+                                          (context, AsyncSnapshot snapshot) {
+                                        if (snapshot.hasData) {
+                                          // parseo los valores de la latitud
+                                          var vel = snapshot.data.velocidad;
+                                          // creo el objeto con la posicion
+
+                                          // creo una vista inicial parametrando los valores anteriores
+                                          // temp
+                                          print(vel);
+                                          return dbl(vel, 2);
+                                        } else if (snapshot.hasError) {
+                                          return Text('${snapshot.error}');
+                                        }
+
+                                        return CircularProgressIndicator();
+                                      },
+                                    )
                                   ],
                                 )
                               ],
@@ -121,8 +142,28 @@ class _MapState extends State<Map> {
                                       color: Colors.black,
                                       fontWeight: FontWeight.w400),
                                 ),
-                                SizedBox(height: 15),
-                                speedO()
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                FutureBuilder<Post>(
+                                  future: widget.post,
+                                  builder: (context, AsyncSnapshot snapshot) {
+                                    if (snapshot.hasData) {
+                                      // parseo los valores de la latitud
+                                      var temp = snapshot.data.temperatura;
+                                      // creo el objeto con la posicion
+
+                                      // creo una vista inicial parametrando los valores anteriores
+                                      // temp
+                                      print(temp);
+                                      return dbl(temp, 1);
+                                    } else if (snapshot.hasError) {
+                                      return Text('${snapshot.error}');
+                                    }
+
+                                    return CircularProgressIndicator();
+                                  },
+                                )
                               ],
                             )),
                       ],
@@ -157,7 +198,30 @@ class _MapState extends State<Map> {
     return tmp;
   }
 
-  Widget speedO() => Container(
+  dbl(var a, var b) {
+    a = double.parse(a);
+    a.round();
+    switch (b) {
+      case 1:
+        {
+          b = "°C";
+        }
+        break;
+      case 2:
+        {
+          b = "MPH";
+        }
+        break;
+      case 3:
+        {
+          b = 'Litros';
+        }
+        break;
+    }
+    return speedO(a, b);
+  }
+
+  speedO(double val, var b) => Container(
         alignment: Alignment.bottomCenter,
         height: 170,
         width: 170,
@@ -167,11 +231,11 @@ class _MapState extends State<Map> {
                 GaugeAnnotation(
                     widget: Container(
                         child: Column(children: <Widget>[
-                      Text('',
+                      Text(val.round().toString(),
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                       SizedBox(height: 20),
-                      Text('mph',
+                      Text(b.toString(),
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold))
                     ])),
@@ -180,6 +244,7 @@ class _MapState extends State<Map> {
               ],
               pointers: <GaugePointer>[
                 NeedlePointer(
+                    value: val,
                     needleLength: 0.95,
                     enableAnimation: true,
                     animationType: AnimationType.ease,

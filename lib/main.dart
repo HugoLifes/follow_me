@@ -9,7 +9,7 @@ import 'json.dart';
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: Inicio(),
+    home: MyApp(),
   ));
 }
 
