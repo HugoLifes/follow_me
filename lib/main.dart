@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:follow_me/inicio.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'map.dart';
 import 'json.dart';
@@ -41,7 +42,7 @@ Future<Post> fetchPost() async {
   String basicAuth = 'Basic ' + base64Encode(utf8.encode('$user:$pass'));
 
   Uri url = Uri.parse(
-      'https://nd.trackcms.com:8080/http://b.trackcms.com/webservice/custom/followmewebservice.php?format=json&unidadId=13576');
+      'https://nd.trackcms.com:8080/http://b.trackcms.com/webservice/custom/followmewebservice.php?format=json&unidadId=13225');
   final response = await http.get(
     url,
     headers: <String, String>{
@@ -52,7 +53,15 @@ Future<Post> fetchPost() async {
   );
 
   if (response.statusCode == 200) {
-    return Post.formJson(json.decode(response.body));
+    var data = json.decode(response.body);
+    String lati = data['LATITUD'];
+    String lngi = data['LONGITUD'];
+    var lat = double.parse(lati);
+    var lng = double.parse(lngi);
+
+    LatLng ubi = LatLng(lat, lng);
+
+    return Post.formJson(data);
   } else {
     throw Exception('falied to load');
   }
@@ -63,7 +72,6 @@ class MyHomePage extends StatefulWidget {
   final String title;
   final Future<Post> post;
 
-  List<dynamic> estatus = [];
   @override
   _MyHomePageState createState() => _MyHomePageState(post: fetchPost());
 }
@@ -71,6 +79,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static String greeting = "";
   Timer timer;
+  Timer timer2;
+
+  var stream;
+
   _MyHomePageState({Future<Post> post});
 
   @override
@@ -81,6 +93,20 @@ class _MyHomePageState extends State<MyHomePage> {
         greeting = "Time: ${DateTime.now().second}";
       });
     });
+
+    timer2 = Timer.periodic(Duration(seconds: 2), (timer) => refresh());
+  }
+
+  void refresh() {
+    setState(() {
+      stream = fetchPost();
+    });
+  }
+
+  @override
+  void dispose() {
+    timer2?.cancel();
+    super.dispose();
   }
 
   @override
@@ -147,7 +173,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ))),
         ],
       ),
-      body: Map(post: fetchPost()),
+      body: Map(
+        post: fetchPost(),
+      ),
     );
   }
 }

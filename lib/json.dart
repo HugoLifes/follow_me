@@ -19,13 +19,14 @@ class Post {
   //recrea la informacion del json a nuestras variables declarada
   factory Post.formJson(Map<String, dynamic> parsedJson) {
     return Post(
-        //relacionamos ese valor a la caracteristicas que segun vaya teniendo el json
-        idUnidad: parsedJson['ID_UNIDAD'],
-        latitud: parsedJson['LATITUD'],
-        longitud: parsedJson['LONGITUD'],
-        fecha: parsedJson['FECHA'],
-        compania: parsedJson['COMPANIA'],
-        temperatura: parsedJson['TEMPERATURA'],
-        velocidad: parsedJson['VELOCIDAD']);
+      //relacionamos ese valor a la caracteristicas que segun vaya teniendo el json
+      idUnidad: parsedJson['ID_UNIDAD'],
+      latitud: parsedJson['LATITUD'],
+      longitud: parsedJson['LONGITUD'],
+      fecha: parsedJson['FECHA'],
+      compania: parsedJson['COMPANIA'],
+      temperatura: parsedJson['TEMPERATURA'],
+      velocidad: parsedJson['VELOCIDAD'],
+    );
   }
 }
