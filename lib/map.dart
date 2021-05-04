@@ -300,18 +300,30 @@ class _GglMapState extends State<GglMap> {
   @override
   void initState() {
     super.initState();
-    timer = Timer.periodic(Duration(seconds: 2), (timer) => refresUbi());
+    timer = Timer.periodic(Duration(seconds: 2), (timer) => addMarker());
   }
 
-  refresUbi() {
+  addMarker() async {
     setState(() {
+      newUbi = widget.ubi;
+    });
+    print('${widget.ubi}');
+    if (widget.ubi.latitude == newUbi.latitude &&
+        widget.ubi.latitude == newUbi.latitude) {
       markers.add(Marker(
           markerId: MarkerId('hi'),
           position: widget.ubi,
           infoWindow: InfoWindow(title: 'Hi 1')));
-    });
-
-    print('Segunda ubicacion: ${widget.ubi}');
+    } else {
+      setState(() {
+        markers.add(Marker(
+            markerId: MarkerId('hi'),
+            position: newUbi,
+            infoWindow: InfoWindow(title: 'Hi')));
+        // ignore: unnecessary_statements
+        markerUpdate.MarkerUpdates.from(markers, markers);
+      });
+    }
 
     //si la ubicacion es igual si hara el marker
   }
@@ -339,16 +351,19 @@ class _GglMapState extends State<GglMap> {
             markers: markers,
             initialCameraPosition: CameraPosition(target: widget.ubi, zoom: 15),
             //markers: markers,
-            onMapCreated: (
-              GoogleMapController controller,
-            ) {
-              _googleMapController = controller;
-            },
+            onMapCreated: _mapController,
           ),
         ),
         //bottom bar view, y sus elementos, tipos de vistas y alineaciones
         navView()
       ],
     );
+  }
+
+  _mapController(GoogleMapController controller) {
+    setState(() {
+      _googleMapController = controller;
+      markerUpdate.MarkerUpdates.from(markers, markers);
+    });
   }
 }

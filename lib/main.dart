@@ -75,14 +75,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Timer timer;
   Timer timer2;
 
-  var stream;
+  Stream<dynamic> stream;
 
   _MyHomePageState({Future<Post> post});
 
   @override
   void initState() {
     super.initState();
-    timer = Timer.periodic((Duration(seconds: 1)), (timer) {
+    timer = Timer.periodic((Duration(seconds: 2)), (timer) {
       setState(() {
         greeting = "Time: ${DateTime.now().second}";
       });
@@ -93,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void refresh() {
     setState(() {
-      stream = fetchPost();
+      fetchPost();
     });
   }
 
