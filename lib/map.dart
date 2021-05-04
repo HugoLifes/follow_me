@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:geolocator/geolocator.dart' as loc;
 import 'package:google_maps_flutter_platform_interface/src/types/marker_updates.dart'
     as markerUpdate;
 import 'package:follow_me/main.dart';
@@ -24,17 +25,34 @@ class _MapState extends State<Map> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: GglMap(
-      post: fetchPost(),
-    ));
+    return FutureBuilder(
+        future: widget.post,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            var lat = double.parse(snapshot.data.latitud);
+            var lng = double.parse(snapshot.data.longitud);
+            LatLng ubi = LatLng(lat, lng);
+            return GglMap(
+              ubi: ubi,
+              post: fetchPost(),
+            );
+          } else if (snapshot.hasData) {
+            return GglMap(
+              post: fetchPost(),
+            );
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        });
   }
 }
 
 // ignore: must_be_immutable
 class GglMap extends StatefulWidget {
-  GglMap({Key key, this.post}) : super(key: key);
+  GglMap({Key key, this.post, this.ubi}) : super(key: key);
   final Future<Post> post;
+  LatLng ubi;
 
   @override
   _GglMapState createState() => _GglMapState();
@@ -49,8 +67,8 @@ class _GglMapState extends State<GglMap> {
   var oldLat;
   var oldLng;
   LatLng newUbi;
-  Timer time;
-  web.MarkerController control;
+  List<LatLng> arrUbi = [];
+  Timer timer;
 
   navView() => Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -282,66 +300,55 @@ class _GglMapState extends State<GglMap> {
   @override
   void initState() {
     super.initState();
+    timer = Timer.periodic(Duration(seconds: 2), (timer) => refresUbi());
+  }
+
+  refresUbi() {
+    setState(() {
+      markers.add(Marker(
+          markerId: MarkerId('hi'),
+          position: widget.ubi,
+          infoWindow: InfoWindow(title: 'Hi 1')));
+    });
+
+    print('Segunda ubicacion: ${widget.ubi}');
+
+    //si la ubicacion es igual si hara el marker
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Post>(
-      future: widget.post,
-      builder: (context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData) {
-          lat = double.parse(snapshot.data.latitud);
-          lng = double.parse(snapshot.data.longitud);
-
-          ubi = LatLng(lat, lng);
-          markers.add(Marker(
-              markerId: MarkerId(''),
-              position: ubi,
-              infoWindow: InfoWindow(title: 'first marker')));
-
-          if (ubi != ubi) {
-            newUbi = ubi;
-            newMarker.add(Marker(
-                markerId: MarkerId(''),
-                position: newUbi,
-                infoWindow: InfoWindow(title: 'Im scnd marker')));
-
-            markerUpdate.MarkerUpdates.from(markers, newMarker);
-          }
-
-          print('$ubi');
-
-          return Stack(
-            children: [
-              Container(
-                // la Web view se basa mediante la data obtenida por la altura entre 2
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                // el mapa y sus caracteristicas
-                child: GoogleMap(
-                  mapType: MapType.normal,
-                  zoomGesturesEnabled: true,
-                  zoomControlsEnabled: false,
-                  initialCameraPosition: CameraPosition(target: ubi, zoom: 15),
-                  markers: markers,
-                  onMapCreated: (
-                    GoogleMapController controller,
-                  ) {
-                    _googleMapController = controller;
-
-                    markerUpdate.MarkerUpdates.from(markers, newMarker);
-                  },
-                ),
-              ),
-              //bottom bar view, y sus elementos, tipos de vistas y alineaciones
-              navView()
-            ],
-          );
-        } else if (snapshot.hasError) {
-          return Text('${snapshot.error}');
-        }
-        return CircularProgressIndicator();
-      },
+    return Stack(
+      children: [
+        Container(
+          // la Web view se basa mediante la data obtenida por la altura entre 2
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          // el mapa y sus caracteristicas
+          child: GoogleMap(
+            myLocationEnabled: true,
+            mapType: MapType.normal,
+            zoomGesturesEnabled: true,
+            zoomControlsEnabled: false,
+            markers: markers,
+            initialCameraPosition: CameraPosition(target: widget.ubi, zoom: 15),
+            //markers: markers,
+            onMapCreated: (
+              GoogleMapController controller,
+            ) {
+              _googleMapController = controller;
+            },
+          ),
+        ),
+        //bottom bar view, y sus elementos, tipos de vistas y alineaciones
+        navView()
+      ],
     );
   }
 }

@@ -42,7 +42,7 @@ Future<Post> fetchPost() async {
   String basicAuth = 'Basic ' + base64Encode(utf8.encode('$user:$pass'));
 
   Uri url = Uri.parse(
-      'https://nd.trackcms.com:8080/http://b.trackcms.com/webservice/custom/followmewebservice.php?format=json&unidadId=13225');
+      'https://nd.trackcms.com:8080/http://b.trackcms.com/webservice/custom/followmewebservice.php?format=json&unidadId=13224');
   final response = await http.get(
     url,
     headers: <String, String>{
@@ -54,12 +54,6 @@ Future<Post> fetchPost() async {
 
   if (response.statusCode == 200) {
     var data = json.decode(response.body);
-    String lati = data['LATITUD'];
-    String lngi = data['LONGITUD'];
-    var lat = double.parse(lati);
-    var lng = double.parse(lngi);
-
-    LatLng ubi = LatLng(lat, lng);
 
     return Post.formJson(data);
   } else {
