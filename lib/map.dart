@@ -1,25 +1,21 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:geolocator/geolocator.dart' as loc;
-import 'package:google_maps_flutter_platform_interface/src/types/marker_updates.dart'
-    as markerUpdate;
 import 'package:follow_me/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter_web/google_maps_flutter_web.dart' as web;
-import 'package:location/location.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'json.dart';
 
-class Map extends StatefulWidget {
-  Map({Key key, this.post}) : super(key: key);
+class Mapas extends StatefulWidget {
+  Mapas({Key key, this.post}) : super(key: key);
   final Future<Post> post;
 
   @override
   _MapState createState() => _MapState();
 }
 
-class _MapState extends State<Map> {
+class _MapState extends State<Mapas> {
   // initialView(context, widget, widget.ubi)
   // @override
 
@@ -59,15 +55,13 @@ class GglMap extends StatefulWidget {
 }
 
 class _GglMapState extends State<GglMap> {
+  web.MarkerController _control;
   GoogleMapController _googleMapController;
-  var markers = Set<Marker>();
-  var newMarker = Set<Marker>();
-  var lat, lng;
-  LatLng ubi;
-  var oldLat;
-  var oldLng;
-  LatLng newUbi;
-  List<LatLng> arrUbi = [];
+  Map<MarkerId, Marker> marker2 = <MarkerId, Marker>{};
+  // variable para setear varias ubicaciones
+  List<LatLng> ubis = [];
+  // variable para setear varios markadores
+  List<Marker> marker = [];
   Timer timer;
 
   navView() => Column(
@@ -298,38 +292,79 @@ class _GglMapState extends State<GglMap> {
         ]),
       );
   @override
+
+  // inicializa algunos estados como el seteo de las ubicaciones y seteo de markers
   void initState() {
+    // contador para refrescar marcadores
+    timer = Timer.periodic(
+        Duration(seconds: 5), (timer) => {refresh(), addMarkers()});
+
     super.initState();
-    timer = Timer.periodic(Duration(seconds: 2), (timer) => addMarker());
+  }
+
+  //se encarga de refrescar y añadir un nuevo elemento cuando se actualiza
+  refresh() async {
+    setState(() {
+      addUbis();
+    });
+  }
+
+  //funcion que añade nuevas posiciones al arreglo
+  addUbis() {
+    // si la la latitud es dif y la long tambien setea si no
+
+    if (widget.ubi != widget.ubi && widget.ubi != widget.ubi) {
+      setState(() {
+        ubis.add(widget.ubi);
+      });
+    } else {
+      ubis.add(widget.ubi);
+    }
   }
 
   addMarker() async {
-    setState(() {
-      newUbi = widget.ubi;
-    });
-    print('${widget.ubi}');
-    if (widget.ubi.latitude == newUbi.latitude &&
-        widget.ubi.latitude == newUbi.latitude) {
-      markers.add(Marker(
-          markerId: MarkerId('hi'),
-          position: widget.ubi,
-          infoWindow: InfoWindow(title: 'Hi 1')));
-    } else {
-      setState(() {
-        markers.add(Marker(
-            markerId: MarkerId('hi'),
-            position: newUbi,
-            infoWindow: InfoWindow(title: 'Hi')));
-        // ignore: unnecessary_statements
-        markerUpdate.MarkerUpdates.from(markers, markers);
-      });
-    }
+    var mark1 = Marker(
+        markerId: MarkerId('hi'),
+        position: widget.ubi,
+        infoWindow: InfoWindow(title: 'Hi 1'));
 
+    setState(() {
+      marker.add(mark1);
+      marker.removeLast();
+    });
     //si la ubicacion es igual si hara el marker
+  }
+
+  // añade los markadores de la lista
+  addMarkers() {
+    int e;
+    for (int i = 0; i < ubis.length; i++) {
+      Marker mark2 = Marker(
+          markerId: MarkerId('$ubis'),
+          position: ubis[i],
+          infoWindow: InfoWindow(title: '$ubis'));
+      if (mark2.position != mark2.position) {
+        marker.removeWhere(
+            (element) => element.markerId == marker.first.markerId);
+        marker.add(mark2.clone());
+
+        setState(() {
+          marker.remove(0);
+        });
+
+        if (marker.length < e) {
+          e = marker.length;
+        }
+      } else {
+        marker.add(mark2.clone());
+        setState(() {});
+      }
+    }
   }
 
   @override
   void dispose() {
+    marker.clear();
     timer?.cancel();
     super.dispose();
   }
@@ -348,7 +383,7 @@ class _GglMapState extends State<GglMap> {
             mapType: MapType.normal,
             zoomGesturesEnabled: true,
             zoomControlsEnabled: false,
-            markers: markers,
+            markers: Set<Marker>.of(marker),
             initialCameraPosition: CameraPosition(target: widget.ubi, zoom: 15),
             //markers: markers,
             onMapCreated: _mapController,
@@ -362,8 +397,9 @@ class _GglMapState extends State<GglMap> {
 
   _mapController(GoogleMapController controller) {
     setState(() {
+      addMarkers();
+      _control;
       _googleMapController = controller;
-      markerUpdate.MarkerUpdates.from(markers, markers);
     });
   }
 }

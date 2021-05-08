@@ -42,7 +42,7 @@ Future<Post> fetchPost() async {
   String basicAuth = 'Basic ' + base64Encode(utf8.encode('$user:$pass'));
 
   Uri url = Uri.parse(
-      'https://nd.trackcms.com:8080/http://b.trackcms.com/webservice/custom/followmewebservice.php?format=json&unidadId=13224');
+      'https://nd.trackcms.com:8080/http://b.trackcms.com/webservice/custom/followmewebservice.php?format=json&unidadId=13222');
   final response = await http.get(
     url,
     headers: <String, String>{
@@ -167,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ))),
         ],
       ),
-      body: Map(
+      body: Mapas(
         post: fetchPost(),
       ),
     );
