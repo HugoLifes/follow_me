@@ -1,11 +1,14 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:follow_me/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter_web/google_maps_flutter_web.dart' as web;
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'json.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+SharedPreferences prefs;
 
 class Mapas extends StatefulWidget {
   Mapas({Key key, this.post}) : super(key: key);
@@ -16,9 +19,6 @@ class Mapas extends StatefulWidget {
 }
 
 class _MapState extends State<Mapas> {
-  // initialView(context, widget, widget.ubi)
-  // @override
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -30,11 +30,11 @@ class _MapState extends State<Mapas> {
             LatLng ubi = LatLng(lat, lng);
             return GglMap(
               ubi: ubi,
-              post: fetchPost(),
+              post: fetchPost(context),
             );
           } else if (snapshot.hasData) {
             return GglMap(
-              post: fetchPost(),
+              post: fetchPost(context),
             );
           }
           return Center(
@@ -42,6 +42,10 @@ class _MapState extends State<Mapas> {
           );
         });
   }
+}
+
+next(context) {
+  return Navigator.pop(context);
 }
 
 // ignore: must_be_immutable
@@ -55,6 +59,11 @@ class GglMap extends StatefulWidget {
 }
 
 class _GglMapState extends State<GglMap> {
+  var left;
+  var right;
+  var top;
+  var bottom;
+
   web.MarkerController _control;
   GoogleMapController _googleMapController;
   Map<MarkerId, Marker> marker2 = <MarkerId, Marker>{};
@@ -297,7 +306,7 @@ class _GglMapState extends State<GglMap> {
   void initState() {
     // contador para refrescar marcadores
     timer = Timer.periodic(
-        Duration(seconds: 5), (timer) => {refresh(), addMarkers()});
+        Duration(seconds: 2), (timer) => {refresh(), addMarkers()});
 
     super.initState();
   }
@@ -313,55 +322,50 @@ class _GglMapState extends State<GglMap> {
   addUbis() {
     // si la la latitud es dif y la long tambien setea si no
 
-    if (widget.ubi != widget.ubi && widget.ubi != widget.ubi) {
+    if (widget.ubi != widget.ubi) {
       setState(() {
         ubis.add(widget.ubi);
       });
     } else {
       ubis.add(widget.ubi);
+
+      if (ubis.length <= 10) {
+        ubis.removeRange(0, 8);
+      }
+      ubis.clear();
     }
-  }
-
-  addMarker() async {
-    var mark1 = Marker(
-        markerId: MarkerId('hi'),
-        position: widget.ubi,
-        infoWindow: InfoWindow(title: 'Hi 1'));
-
-    setState(() {
-      marker.add(mark1);
-      marker.removeLast();
-    });
-    //si la ubicacion es igual si hara el marker
   }
 
   // añade los markadores de la lista
   addMarkers() {
-    int e;
+    //recorre el arreglo de las posiciones
     for (int i = 0; i < ubis.length; i++) {
+      // setea el primer marcador con la primera posicion del arreglo
       Marker mark2 = Marker(
           markerId: MarkerId('$ubis'),
           position: ubis[i],
-          infoWindow: InfoWindow(title: '$ubis'));
+          infoWindow: InfoWindow(title: 'Unidad a rastrear'));
+      marker.clear();
+
+      //si el marcador es diferente al anterior setea
       if (mark2.position != mark2.position) {
-        marker.removeWhere(
-            (element) => element.markerId == marker.first.markerId);
-        marker.add(mark2.clone());
-
         setState(() {
-          marker.remove(0);
+          marker.add(mark2.clone());
         });
-
-        if (marker.length < e) {
-          e = marker.length;
-        }
       } else {
+        // borra las posiciones mas alla del largo permitido
         marker.add(mark2.clone());
-        setState(() {});
+        if (marker.length > 2) {
+          marker.removeRange(0, 1);
+        }
+
+        // saca los maximos y minimos para dar angulo
+
       }
     }
   }
 
+  //cancela estados
   @override
   void dispose() {
     marker.clear();
@@ -398,7 +402,6 @@ class _GglMapState extends State<GglMap> {
   _mapController(GoogleMapController controller) {
     setState(() {
       addMarkers();
-      _control;
       _googleMapController = controller;
     });
   }

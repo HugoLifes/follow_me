@@ -7,6 +7,7 @@ class Post {
   String compania;
   String temperatura;
   String velocidad;
+  int value;
   // se inicia
   Post(
       {this.temperatura,
@@ -14,6 +15,7 @@ class Post {
       this.velocidad,
       this.longitud,
       this.idUnidad,
+      this.value,
       this.fecha,
       this.compania});
   //recrea la informacion del json a nuestras variables declarada
@@ -23,10 +25,27 @@ class Post {
       idUnidad: parsedJson['ID_UNIDAD'],
       latitud: parsedJson['LATITUD'],
       longitud: parsedJson['LONGITUD'],
-      fecha: parsedJson['FECHA'],
+      fecha: parsedJson['fechaFinal'],
       compania: parsedJson['COMPANIA'],
       temperatura: parsedJson['TEMPERATURA'],
       velocidad: parsedJson['VELOCIDAD'],
+      value: parsedJson['value'],
+    );
+  }
+}
+
+class Send {
+  int value;
+  String msn;
+  String idU;
+
+  Send({this.value, this.msn, this.idU});
+
+  factory Send.fromJson(Map<String, dynamic> json) {
+    return Send(
+      value: json['value'],
+      msn: json['message'],
+      idU: json['unitId'],
     );
   }
 }
