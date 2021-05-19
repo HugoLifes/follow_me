@@ -38,6 +38,7 @@ dependencies:
   syncfusion_flutter_gauges: ^19.1.56
   jwt_decoder: ^2.0.1
   shared_preferences: ^2.0.5
+  custom_timer: ^0.0.3
   
 
 

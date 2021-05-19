@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:math' as math;
+
+import 'package:custom_timer/custom_timer.dart';
 import 'package:follow_me/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter_web/google_maps_flutter_web.dart' as web;
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'inicio.dart';
 import 'json.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,13 +31,17 @@ class _MapState extends State<Mapas> {
             var lat = double.parse(snapshot.data.latitud);
             var lng = double.parse(snapshot.data.longitud);
             LatLng ubi = LatLng(lat, lng);
+
+            //DateTime fechaF = snapshot.data.fecha;
+
             return GglMap(
+              //fechita: fechaF,
               ubi: ubi,
-              post: fetchPost(context),
+              post: fetchPost(),
             );
           } else if (snapshot.hasData) {
             return GglMap(
-              post: fetchPost(context),
+              post: fetchPost(),
             );
           }
           return Center(
@@ -50,10 +57,10 @@ next(context) {
 
 // ignore: must_be_immutable
 class GglMap extends StatefulWidget {
-  GglMap({Key key, this.post, this.ubi}) : super(key: key);
+  GglMap({Key key, this.post, this.ubi, this.fechita}) : super(key: key);
   final Future<Post> post;
   LatLng ubi;
-
+  DateTime fechita;
   @override
   _GglMapState createState() => _GglMapState();
 }
@@ -63,8 +70,8 @@ class _GglMapState extends State<GglMap> {
   var right;
   var top;
   var bottom;
+  var now = DateTime.now();
 
-  web.MarkerController _control;
   GoogleMapController _googleMapController;
   Map<MarkerId, Marker> marker2 = <MarkerId, Marker>{};
   // variable para setear varias ubicaciones
@@ -72,7 +79,7 @@ class _GglMapState extends State<GglMap> {
   // variable para setear varios markadores
   List<Marker> marker = [];
   Timer timer;
-
+  CustomTimerController controller = new CustomTimerController();
   navView() => Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -236,6 +243,14 @@ class _GglMapState extends State<GglMap> {
     return speedO(a, b);
   }
 
+  mochar() {
+    var horas = widget.fechita.hour;
+    var mins = widget.fechita.minute;
+    var seconds = widget.fechita.second;
+
+    print('$horas : $mins : $seconds ');
+  }
+
   speedO(double val, var b) => Container(
         alignment: Alignment.bottomCenter,
         height: 170,
@@ -304,6 +319,7 @@ class _GglMapState extends State<GglMap> {
 
   // inicializa algunos estados como el seteo de las ubicaciones y seteo de markers
   void initState() {
+    controller.start();
     // contador para refrescar marcadores
     timer = Timer.periodic(
         Duration(seconds: 2), (timer) => {refresh(), addMarkers()});
@@ -368,9 +384,9 @@ class _GglMapState extends State<GglMap> {
   //cancela estados
   @override
   void dispose() {
+    super.dispose();
     marker.clear();
     timer?.cancel();
-    super.dispose();
   }
 
   @override
@@ -387,17 +403,66 @@ class _GglMapState extends State<GglMap> {
             mapType: MapType.normal,
             zoomGesturesEnabled: true,
             zoomControlsEnabled: false,
-            markers: Set<Marker>.of(marker),
-            initialCameraPosition: CameraPosition(target: widget.ubi, zoom: 15),
+            //markers: Set<Marker>.of(marker),
+            initialCameraPosition:
+                CameraPosition(target: LatLng(26.946483, -105.6618), zoom: 15),
             //markers: markers,
             onMapCreated: _mapController,
           ),
         ),
+
         //bottom bar view, y sus elementos, tipos de vistas y alineaciones
-        navView()
+        expire(),
+        navView(),
       ],
     );
   }
+
+  expire() => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(15),
+            width: 209,
+            height: 120,
+            child: Card(
+                elevation: 4,
+                child: Padding(
+                  padding: EdgeInsets.all(15),
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.topCenter,
+                        child: Text(
+                          'Tiempo de expiración',
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 7,
+                      ),
+                      Container(
+                          alignment: Alignment.bottomCenter,
+                          child: CustomTimer(
+                              onFinish: () {
+                                setState(() {
+                                  Navigator.of(context).pop();
+                                });
+                              },
+                              controller: controller,
+                              onBuildAction: CustomTimerAction.auto_start,
+                              from: Duration(seconds: 20),
+                              to: Duration(seconds: 0),
+                              builder: (remaining) {
+                                return Text('${remaining.seconds}');
+                              }))
+                    ],
+                  ),
+                )),
+          ),
+        ],
+      );
 
   _mapController(GoogleMapController controller) {
     setState(() {

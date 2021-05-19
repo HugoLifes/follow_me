@@ -22,13 +22,13 @@ class Post {
   factory Post.formJson(Map<String, dynamic> parsedJson) {
     return Post(
       //relacionamos ese valor a la caracteristicas que segun vaya teniendo el json
-      idUnidad: parsedJson['ID_UNIDAD'],
-      latitud: parsedJson['LATITUD'],
-      longitud: parsedJson['LONGITUD'],
+      idUnidad: parsedJson['data']['ID_UNIDAD'],
+      latitud: parsedJson['data']['LATITUD'],
+      longitud: parsedJson['data']['LONGITUD'],
       fecha: parsedJson['fechaFinal'],
-      compania: parsedJson['COMPANIA'],
-      temperatura: parsedJson['TEMPERATURA'],
-      velocidad: parsedJson['VELOCIDAD'],
+      compania: parsedJson['data']['COMPANIA'],
+      temperatura: parsedJson['data']['TEMPERATURA'],
+      velocidad: parsedJson['data']['VELOCIDAD'],
       value: parsedJson['value'],
     );
   }

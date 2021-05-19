@@ -86,7 +86,8 @@ class _InicioState extends State<Inicio> {
                               color: Colors.pink,
                               onPressed: () {
                                 if (_formKey.currentState.validate()) {
-                                  Future.delayed(Duration.zero, () async {
+                                  Future.delayed(Duration(seconds: 1),
+                                      () async {
                                     setState(() {
                                       sendData = post(tk.text).whenComplete(
                                           () => {
@@ -129,8 +130,9 @@ class _InicioState extends State<Inicio> {
         }
 
         return Center(
-          child: CircularProgressIndicator(),
-        );
+            child: CircularProgressIndicator(
+          backgroundColor: Colors.pink,
+        ));
       },
     );
   }
@@ -144,8 +146,6 @@ class _InicioState extends State<Inicio> {
     print('${res.body}');
     if (res.statusCode == 200) {
       var data = jsonDecode(res.body);
-
-      var value = data['value'];
 
       return Send.fromJson(data);
     } else {

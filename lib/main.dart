@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:js';
+
 import 'package:flutter/material.dart';
 import 'package:follow_me/inicio.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'package:http/http.dart' as http;
 import 'map.dart';
 import 'json.dart';
@@ -22,6 +22,7 @@ void main() {
 class MyApp extends StatefulWidget {
   MyApp({Key key}) : super(key: key);
   var date;
+
   static Future init() async {
     prefs = await SharedPreferences.getInstance();
   }
@@ -41,7 +42,7 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         home: MyHomePage(
           title: 'Rastreo',
-          post: fetchPost(context),
+          post: fetchPost(),
         ));
   }
 }
@@ -51,10 +52,12 @@ dataOff(id) async {
   prefs.setString('id', id);
 }
 
-Future<Post> fetchPost(context) async {
+Future<Post> fetchPost() async {
   var id = prefs.getString('id');
+
   Uri url = Uri.parse(
       'http://192.168.1.110:8080/FollowMeBackend/web/index.php?r=follow-me-access/info-unidad&unitId=$id');
+
   final response = await http.get(
     url,
   );
@@ -62,11 +65,7 @@ Future<Post> fetchPost(context) async {
   if (response.statusCode == 200) {
     var data = json.decode(response.body);
 
-    var fecha = data['fechaFinal'];
-    //print('$fecha');
-    
-
-    return Post.formJson(data['data']);
+    return Post.formJson(data);
   } else {
     throw Exception('falied to load');
   }
@@ -76,33 +75,10 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title, this.post}) : super(key: key);
   final String title;
   final Future<Post> post;
-  static Future init() async {
-    prefs = await SharedPreferences.getInstance();
-  }
-
-  var date;
-
-  fecha(fecha) async {
-    await MyHomePage.init();
-    prefs.setString('fecha', fecha);
-    //print('aqui la fecha : $date');
-    date = prefs.getString('fecha');
-    //print('Esta es la fecha final: $date');
-  }
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(post: fetchPost(context));
+  _MyHomePageState createState() => _MyHomePageState(post: fetchPost());
 }
-
-open(value) async {
-  await MyHomePage.init();
-  prefs.setInt('val', value);
-
-  //print('aqui: $val');
-}
-
-
-
 
 class _MyHomePageState extends State<MyHomePage> {
   static String greeting = "";
@@ -125,14 +101,11 @@ class _MyHomePageState extends State<MyHomePage> {
     timer2 = Timer.periodic(Duration(seconds: 2), (timer) => refresh());
   }
 
-
-  void starTime(){
-  
-}
+  void starTime() {}
 
   void refresh() {
     setState(() {
-      fetchPost(context);
+      fetchPost();
     });
   }
 
@@ -159,6 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     builder: (context, AsyncSnapshot snapshot) {
                       if (snapshot.hasData) {
                         var unidad = snapshot.data.idUnidad;
+
                         return Text('$unidad');
                       } else if (snapshot.hasData) {
                         return Text('Algo ha fallado');
@@ -182,6 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context, AsyncSnapshot snapshot) {
                         if (snapshot.hasData) {
                           var unidad = snapshot.data.compania;
+                          print('Hola aqui estoy: $unidad');
                           return Text('$unidad');
                         } else if (snapshot.hasData) {
                           return Text('Halgo ha fallado');
@@ -198,12 +173,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: EdgeInsets.only(right: 20.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text('${widget.date}')],
+                  children: [Text('$greeting')],
                 )),
           ],
         ),
         body: Mapas(
-          post: fetchPost(context),
+          post: fetchPost(),
         ));
   }
 }
