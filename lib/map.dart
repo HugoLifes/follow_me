@@ -32,10 +32,12 @@ class _MapState extends State<Mapas> {
             var lng = double.parse(snapshot.data.longitud);
             LatLng ubi = LatLng(lat, lng);
 
-            //DateTime fechaF = snapshot.data.fecha;
+            var fechaFinal = snapshot.data.fechaF;
+
+            //print('aqui la fecha: $fechaF');
 
             return GglMap(
-              //fechita: fechaF,
+              fechita: fechaFinal,
               ubi: ubi,
               post: fetchPost(),
             );
@@ -51,33 +53,26 @@ class _MapState extends State<Mapas> {
   }
 }
 
-next(context) {
-  return Navigator.pop(context);
-}
-
 // ignore: must_be_immutable
 class GglMap extends StatefulWidget {
   GglMap({Key key, this.post, this.ubi, this.fechita}) : super(key: key);
   final Future<Post> post;
   LatLng ubi;
-  DateTime fechita;
+  var fechita;
+
   @override
   _GglMapState createState() => _GglMapState();
 }
 
 class _GglMapState extends State<GglMap> {
-  var left;
-  var right;
-  var top;
-  var bottom;
   var now = DateTime.now();
-
   GoogleMapController _googleMapController;
   Map<MarkerId, Marker> marker2 = <MarkerId, Marker>{};
   // variable para setear varias ubicaciones
   List<LatLng> ubis = [];
   // variable para setear varios markadores
   List<Marker> marker = [];
+
   Timer timer;
   CustomTimerController controller = new CustomTimerController();
   navView() => Column(
@@ -243,12 +238,24 @@ class _GglMapState extends State<GglMap> {
     return speedO(a, b);
   }
 
-  mochar() {
-    var horas = widget.fechita.hour;
-    var mins = widget.fechita.minute;
-    var seconds = widget.fechita.second;
+  dif() {
+    var exp = DateTime.parse(widget.fechita).hour;
+    var exp2 = DateTime.parse(widget.fechita).minute;
+    var exp3 = DateTime.parse(widget.fechita).second;
 
-    print('$horas : $mins : $seconds ');
+    var horaActual = DateTime.now().hour;
+    var minActual = DateTime.now().minute;
+    var secActual = DateTime.now().second;
+
+    var diff = horaActual - exp;
+    var diff2 = minActual - exp2;
+    var diff3 = secActual - exp3;
+
+    /* var diff = horaActual.difference(expiracion).inHours;
+    var diff2 = horaActual.difference(expiracion).inMinutes;
+    var diff3 = horaActual.difference(expiracion).inSeconds; */
+
+    return Duration(hours: diff, minutes: diff2, seconds: diff3);
   }
 
   speedO(double val, var b) => Container(
@@ -320,9 +327,10 @@ class _GglMapState extends State<GglMap> {
   // inicializa algunos estados como el seteo de las ubicaciones y seteo de markers
   void initState() {
     controller.start();
+
     // contador para refrescar marcadores
     timer = Timer.periodic(
-        Duration(seconds: 2), (timer) => {refresh(), addMarkers()});
+        Duration(seconds: 1), (timer) => {refresh(), addMarkers()});
 
     super.initState();
   }
@@ -330,7 +338,9 @@ class _GglMapState extends State<GglMap> {
   //se encarga de refrescar y añadir un nuevo elemento cuando se actualiza
   refresh() async {
     setState(() {
-      addUbis();
+      if (mounted) {
+        addUbis();
+      }
     });
   }
 
@@ -340,7 +350,9 @@ class _GglMapState extends State<GglMap> {
 
     if (widget.ubi != widget.ubi) {
       setState(() {
-        ubis.add(widget.ubi);
+        if (mounted) {
+          ubis.add(widget.ubi);
+        }
       });
     } else {
       ubis.add(widget.ubi);
@@ -366,7 +378,9 @@ class _GglMapState extends State<GglMap> {
       //si el marcador es diferente al anterior setea
       if (mark2.position != mark2.position) {
         setState(() {
-          marker.add(mark2.clone());
+          if (mounted) {
+            marker.add(mark2.clone());
+          }
         });
       } else {
         // borra las posiciones mas alla del largo permitido
@@ -387,6 +401,7 @@ class _GglMapState extends State<GglMap> {
     super.dispose();
     marker.clear();
     timer?.cancel();
+    _googleMapController.dispose();
   }
 
   @override
@@ -403,15 +418,15 @@ class _GglMapState extends State<GglMap> {
             mapType: MapType.normal,
             zoomGesturesEnabled: true,
             zoomControlsEnabled: false,
-            //markers: Set<Marker>.of(marker),
-            initialCameraPosition:
-                CameraPosition(target: LatLng(26.946483, -105.6618), zoom: 15),
+            markers: Set<Marker>.of(marker),
+            initialCameraPosition: CameraPosition(target: widget.ubi, zoom: 15),
             //markers: markers,
             onMapCreated: _mapController,
           ),
         ),
 
         //bottom bar view, y sus elementos, tipos de vistas y alineaciones
+
         expire(),
         navView(),
       ],
@@ -447,15 +462,21 @@ class _GglMapState extends State<GglMap> {
                           child: CustomTimer(
                               onFinish: () {
                                 setState(() {
-                                  Navigator.of(context).pop();
+                                  if (mounted) {
+                                    Navigator.of(context)
+                                      ..pop()
+                                      ..push(MaterialPageRoute(
+                                          builder: (_) => Inicio()));
+                                  }
                                 });
                               },
                               controller: controller,
                               onBuildAction: CustomTimerAction.auto_start,
-                              from: Duration(seconds: 20),
-                              to: Duration(seconds: 0),
+                              from: dif(),
+                              to: Duration(hours: 0, minutes: 0, seconds: 0),
                               builder: (remaining) {
-                                return Text('${remaining.seconds}');
+                                return Text(
+                                    '${remaining.hours}:${remaining.minutes}:${remaining.seconds}');
                               }))
                     ],
                   ),

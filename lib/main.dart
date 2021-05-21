@@ -9,21 +9,21 @@ import 'map.dart';
 import 'json.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-SharedPreferences prefs;
-
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     home: Inicio(),
+    routes: <String, WidgetBuilder>{
+      '/screen1': (_) => Inicio(),
+      '/screen2': (_) => MyApp()
+    },
   ));
 }
 
-// ignore: must_be_immutable
-class MyApp extends StatefulWidget {
-  MyApp({Key key}) : super(key: key);
-  var date;
+SharedPreferences prefs;
 
-  static Future init() async {
+class MyApp extends StatefulWidget {
+  static init() async {
     prefs = await SharedPreferences.getInstance();
   }
 
@@ -50,9 +50,13 @@ class _MyAppState extends State<MyApp> {
 dataOff(id) async {
   await MyApp.init();
   prefs.setString('id', id);
+
+  /*  id = prefs.getString('id');
+  print('aqui el id: $id'); */
 }
 
 Future<Post> fetchPost() async {
+  prefs = await SharedPreferences.getInstance();
   var id = prefs.getString('id');
 
   Uri url = Uri.parse(
@@ -82,9 +86,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static String greeting = "";
-  Timer timer;
+
   Timer timer2;
-  //var val = prefs.getInt('val');
 
   _MyHomePageState({Future<Post> post});
 
@@ -92,20 +95,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    timer = Timer.periodic((Duration(seconds: 1)), (timer) {
-      setState(() {
-        greeting = "Time: ${DateTime.now().second}";
-      });
-    });
-
-    timer2 = Timer.periodic(Duration(seconds: 2), (timer) => refresh());
+    timer2 = Timer.periodic(Duration(seconds: 1), (timer) => refresh());
   }
-
-  void starTime() {}
 
   void refresh() {
     setState(() {
-      fetchPost();
+      if (mounted) {
+        fetchPost();
+      }
     });
   }
 
@@ -118,7 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text(widget.title),
           actions: [
@@ -134,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         var unidad = snapshot.data.idUnidad;
 
                         return Text('$unidad');
-                      } else if (snapshot.hasData) {
+                      } else if (snapshot.hasError) {
                         return Text('Algo ha fallado');
                       }
                       return Container(
@@ -158,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           var unidad = snapshot.data.compania;
                           print('Hola aqui estoy: $unidad');
                           return Text('$unidad');
-                        } else if (snapshot.hasData) {
+                        } else if (snapshot.hasError) {
                           return Text('Halgo ha fallado');
                         }
                         return Container(

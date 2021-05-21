@@ -6,8 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:follow_me/main.dart';
 import 'package:follow_me/methods/textForms.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'map.dart';
+import 'package:follow_me/methods/json2.dart';
 
 SharedPreferences prefs;
 
@@ -20,7 +19,7 @@ class _InicioState extends State<Inicio> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController tk = TextEditingController();
   bool _autovalidate = false;
-
+  Posting post;
   var idUnida;
   bool press = false;
   bool nameValidator;
@@ -31,125 +30,98 @@ class _InicioState extends State<Inicio> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          backgroundColor: Colors.pink,
-          centerTitle: true,
-          elevation: 3,
-          title: Text('Soluciones Moviles'),
-        ),
-        body: sendData == null
-            ? SafeArea(
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: new BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage('assets/images/rastreo-gps.jpg'),
-                        fit: BoxFit.cover),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            height: 200,
-                            width: 300,
-                            child: Form(
-                              key: _formKey,
-                              child: Card(
-                                elevation: 3,
-                                color: Colors.white,
-                                child: CustomTextField(
-                                  controller: tk,
-                                  icon: Icon(Icons.vpn_key),
-                                  hint: 'Introduce tu llave',
-                                  validator: (nameValidator) {
-                                    if (nameValidator == null ||
-                                        nameValidator.isEmpty) {
-                                      return 'Please enter some text';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(bottom: 30),
-                            child: MaterialButton(
-                              elevation: 3,
-                              color: Colors.pink,
-                              onPressed: () {
-                                if (_formKey.currentState.validate()) {
-                                  Future.delayed(Duration(seconds: 1),
-                                      () async {
-                                    setState(() {
-                                      sendData = post(tk.text).whenComplete(
-                                          () => {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            MyApp()))
-                                              });
-                                    });
-                                  });
-                                }
-                              },
-                              child: Text(
-                                'Check',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+              backgroundColor: Colors.pink,
+              centerTitle: true,
+              elevation: 3,
+              title: Text('Soluciones Moviles'),
+            ),
+            body: SafeArea(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: new BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('assets/images/rastreo-gps.jpg'),
+                      fit: BoxFit.cover),
                 ),
-              )
-            : nexty(sendData),
-      ),
-    );
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          alignment: Alignment.center,
+                          height: 200,
+                          width: 300,
+                          child: Form(
+                            key: _formKey,
+                            child: Card(
+                              elevation: 3,
+                              color: Colors.white,
+                              child: CustomTextField(
+                                controller: tk,
+                                icon: Icon(Icons.vpn_key),
+                                hint: 'Introduce tu llave',
+                                validator: (nameValidator) {
+                                  if (nameValidator == null ||
+                                      nameValidator.isEmpty) {
+                                    return 'Please enter some text';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(bottom: 30),
+                          child: MaterialButton(
+                            elevation: 3,
+                            color: Colors.pink,
+                            onPressed: () async {
+                              final String token = tk.text;
+                              if (_formKey.currentState.validate()) {
+                                final Posting posting = await newMethod(token);
+                                setState(() {
+                                  post = posting;
+                                  dataOff(post.unitId);
+
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                      builder: (_) => MyApp()));
+                                });
+                              }
+                            },
+                            child: Text(
+                              'Check',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )));
   }
 
-  FutureBuilder<Send> nexty(sendData) {
-    return FutureBuilder<Send>(
-      future: Future.delayed(Duration(seconds: 1), () => (sendData)),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          var id = snapshot.data.idU;
-          return dataOff(id);
-        } else if (snapshot.hasError) {
-          return Text('${snapshot.error}');
-        }
-
-        return Center(
-            child: CircularProgressIndicator(
-          backgroundColor: Colors.pink,
-        ));
-      },
-    );
-  }
-
-  Future<Send> post(String tokn) async {
-    Uri url = Uri.parse(
+  Future<Posting> newMethod(String tokn) async {
+    final Uri url = Uri.parse(
         'http://192.168.1.110:8080/FollowMeBackend/web/index.php?r=follow-me-access/validate-token');
-    var res = await http.post(url, body: {
+    final response = await http.post(url, body: {
       "params": json.encode({'token': tokn})
     });
-    print('${res.body}');
-    if (res.statusCode == 200) {
-      var data = jsonDecode(res.body);
 
-      return Send.fromJson(data);
+    if (response.statusCode == 200) {
+      final String data = response.body;
+
+      return postingFromJson(data);
     } else {
-      throw Exception('Falies to load data');
+      return null;
     }
   }
 }

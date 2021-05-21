@@ -3,7 +3,8 @@ class Post {
   String idUnidad;
   String latitud;
   String longitud;
-  String fecha;
+  String fechai;
+  String fechaF;
   String compania;
   String temperatura;
   String velocidad;
@@ -16,7 +17,8 @@ class Post {
       this.longitud,
       this.idUnidad,
       this.value,
-      this.fecha,
+      this.fechai,
+      this.fechaF,
       this.compania});
   //recrea la informacion del json a nuestras variables declarada
   factory Post.formJson(Map<String, dynamic> parsedJson) {
@@ -25,7 +27,8 @@ class Post {
       idUnidad: parsedJson['data']['ID_UNIDAD'],
       latitud: parsedJson['data']['LATITUD'],
       longitud: parsedJson['data']['LONGITUD'],
-      fecha: parsedJson['fechaFinal'],
+      fechai: parsedJson['fechaInicial'],
+      fechaF: parsedJson['fechaFinal'],
       compania: parsedJson['data']['COMPANIA'],
       temperatura: parsedJson['data']['TEMPERATURA'],
       velocidad: parsedJson['data']['VELOCIDAD'],
