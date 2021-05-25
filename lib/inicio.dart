@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flip_card/flip_card.dart';
 import 'package:follow_me/json.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:follow_me/main.dart';
 import 'package:follow_me/methods/textForms.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:follow_me/methods/json2.dart';
+import 'package:slimy_card/slimy_card.dart';
 
 SharedPreferences prefs;
 
@@ -27,87 +29,6 @@ class _InicioState extends State<Inicio> {
   String name;
   Future<Send> sendData;
   Future<Send> send;
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: AppBar(
-              backgroundColor: Colors.pink,
-              centerTitle: true,
-              elevation: 3,
-              title: Text('Soluciones Moviles'),
-            ),
-            body: SafeArea(
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                decoration: new BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('assets/images/rastreo-gps.jpg'),
-                      fit: BoxFit.cover),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Column(
-                      children: [
-                        Container(
-                          alignment: Alignment.center,
-                          height: 200,
-                          width: 300,
-                          child: Form(
-                            key: _formKey,
-                            child: Card(
-                              elevation: 3,
-                              color: Colors.white,
-                              child: CustomTextField(
-                                controller: tk,
-                                icon: Icon(Icons.vpn_key),
-                                hint: 'Introduce tu llave',
-                                validator: (nameValidator) {
-                                  if (nameValidator == null ||
-                                      nameValidator.isEmpty) {
-                                    return 'Please enter some text';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(bottom: 30),
-                          child: MaterialButton(
-                            elevation: 3,
-                            color: Colors.pink,
-                            onPressed: () async {
-                              final String token = tk.text;
-                              if (_formKey.currentState.validate()) {
-                                final Posting posting = await newMethod(token);
-                                setState(() {
-                                  post = posting;
-                                  dataOff(post.unitId);
-
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (_) => MyApp()));
-                                });
-                              }
-                            },
-                            child: Text(
-                              'Check',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            )));
-  }
 
   Future<Posting> newMethod(String tokn) async {
     final Uri url = Uri.parse(
@@ -124,4 +45,181 @@ class _InicioState extends State<Inicio> {
       return null;
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [
+                        Colors.white,
+                        Colors.lightBlue[300],
+                        Colors.lightBlue[400]
+                      ],
+                      stops: [
+                        0.1,
+                        0.6,
+                        0.7
+                      ],
+                      begin: FractionalOffset.topCenter,
+                      end: FractionalOffset.bottomCenter),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // aqui esta la imagen
+                    imageContainer(),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // aqui va el textBox
+                        Container(child: flip())
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )));
+  }
+
+  errorLog() => Container(
+      height: 250,
+      width: 350,
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+              colors: [Colors.red[100], Colors.red[400], Colors.red[500]],
+              stops: [0.1, 0.6, 0.7],
+              begin: FractionalOffset.topRight,
+              end: FractionalOffset.bottomLeft)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Text(
+            'Opss!',
+            style: TextStyle(),
+          ),
+          Text('No haz introducido un token :(')
+        ],
+      ));
+
+  flip() => FlipCard(
+        front: textBox(),
+        back: errorLog(),
+      );
+  slimyCard() => Container(
+        child: SlimyCard(
+          color: Colors.lightBlue[300],
+          width: 400,
+          topCardHeight: 250,
+          bottomCardHeight: 200,
+          borderRadius: 15,
+          topCardWidget: textBox(),
+          bottomCardWidget: errorLog(),
+          slimeEnabled: true,
+        ),
+      );
+
+  imageContainer() => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Bienvenido',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 51,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height / 2,
+            width: MediaQuery.of(context).size.width / 2,
+            decoration: new BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('assets/images/fm.png'),
+                  fit: BoxFit.fitHeight),
+            ),
+          ),
+        ],
+      );
+
+  textBox() => Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        child: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  colors: [
+                    Colors.white,
+                    Colors.lightBlue[300],
+                    Colors.lightBlue[400]
+                  ],
+                  stops: [
+                    0.2,
+                    0.7,
+                    0.8
+                  ],
+                  begin: FractionalOffset.topRight,
+                  end: FractionalOffset.bottomLeft),
+              borderRadius: BorderRadius.circular(25)),
+          alignment: Alignment.center,
+          height: 250,
+          width: 350,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                CustomTextField(
+                  controller: tk,
+                  icon: Icon(Icons.vpn_key),
+                  hint: 'Introduce llave de rastreo',
+                  validator: (nameValidator) {
+                    if (nameValidator == null || nameValidator.isEmpty) {
+                      return 'Porfa';
+                    }
+                    return null;
+                  },
+                ),
+                botonCheck()
+              ],
+            ),
+          ),
+        ),
+      );
+
+  botonCheck() => Container(
+        width: 140,
+        height: 80,
+        padding: EdgeInsets.only(bottom: 30),
+        child: MaterialButton(
+          elevation: 5,
+          color: Color(0xFF444444),
+          onPressed: () async {
+            final String token = tk.text;
+            if (_formKey.currentState.validate()) {
+              final Posting posting = await newMethod(token);
+              setState(() {
+                post = posting;
+                dataOff(post.unitId);
+
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => MyApp()));
+              });
+            }
+          },
+          child: Text(
+            'Buscar',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
 }

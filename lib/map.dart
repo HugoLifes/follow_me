@@ -247,9 +247,9 @@ class _GglMapState extends State<GglMap> {
     var minActual = DateTime.now().minute;
     var secActual = DateTime.now().second;
 
-    var diff = horaActual - exp;
-    var diff2 = minActual - exp2;
-    var diff3 = secActual - exp3;
+    var diff = exp - horaActual;
+    var diff2 = exp2 - minActual;
+    var diff3 = exp3 - secActual;
 
     /* var diff = horaActual.difference(expiracion).inHours;
     var diff2 = horaActual.difference(expiracion).inMinutes;
