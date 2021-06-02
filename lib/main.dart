@@ -1,16 +1,29 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:follow_me/inicio.dart';
+import 'package:follow_me/methods/json2.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:slide_countdown_clock/slide_countdown_clock.dart';
 import 'map.dart';
 import 'json.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Inicio(),
+    // rutas de las paginas
+    routes: <String, WidgetBuilder>{
+      '/screen1': (_) => Inicio(),
+      '/screen2': (_) => MyHomePage()
+    },
+  ));
+
+  //añadidos especiales para performance chrome
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
@@ -19,19 +32,13 @@ void main() {
     systemNavigationBarDividerColor: Colors.transparent,
   ));
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: Inicio(),
-    routes: <String, WidgetBuilder>{
-      '/screen1': (_) => Inicio(),
-      '/screen2': (_) => MyApp()
-    },
-  ));
 }
 
+// guardado en memoria
 SharedPreferences prefs;
 
 class MyApp extends StatefulWidget {
+  //inicia el guardado de memoria
   static init() async {
     prefs = await SharedPreferences.getInstance();
   }
@@ -45,145 +52,258 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Map',
-        theme: ThemeData(
-          primarySwatch: Colors.pink,
-        ),
         debugShowCheckedModeBanner: false,
         home: MyHomePage(
           title: 'Rastreo',
-          post: fetchPost(),
         ));
   }
 }
 
+//recibe el idUnit del metodo post
 dataOff(id) async {
   await MyApp.init();
-  prefs.setString('id', id);
-
-  /*  id = prefs.getString('id');
-  print('aqui el id: $id'); */
+  prefs.setInt('id', id);
 }
 
-Future<Post> fetchPost() async {
-  prefs = await SharedPreferences.getInstance();
-  var id = prefs.getString('id');
+//hace el get al url de segun el id obtenido obtendra datos especificos
 
-  Uri url = Uri.parse(
-      'http://192.168.1.110:8080/FollowMeBackend/web/index.php?r=follow-me-access/info-unidad&unitId=$id');
+// con este future aplicas el nuevo json mas rapido
 
-  final response = await http.get(
-    url,
-  );
-
-  if (response.statusCode == 200) {
-    var data = json.decode(response.body);
-
-    return Post.formJson(data);
-  } else {
-    throw Exception('falied to load');
-  }
-}
-
+//cambia estado la clase
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title, this.post}) : super(key: key);
   final String title;
   final Future<Post> post;
+  static init() async {
+    prefs = await SharedPreferences.getInstance();
+  }
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(post: fetchPost());
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static String greeting = "";
+  var greeting;
+  Welcome hi;
+  var lat;
+  var lng;
+  LatLng ubi;
+  var unidad;
+  var comp;
+  var fechaf;
+  Timer timer;
+  final GlobalKey<NavigatorState> navigatorKey =
+      new GlobalKey<NavigatorState>();
 
-  Timer timer2;
+  Future<Welcome> newPost() async {
+    prefs = await SharedPreferences.getInstance();
+    var id = prefs.getInt('id');
+    Uri url = Uri.parse(
+        'http://192.168.1.110:8080/FollowMeBackend/web/index.php?r=follow-me-access/info-unidad&unitId=${id.toString()}');
+    final resp = await http.get(url);
 
-  _MyHomePageState({Future<Post> post});
+    if (resp.statusCode == 200) {
+      var data = resp.body;
 
-  @override
-  void initState() {
-    super.initState();
-
-    timer2 = Timer.periodic(Duration(seconds: 1), (timer) => refresh());
+      return welcomeFromJson(data);
+    } else {
+      return null;
+    }
   }
 
-  void refresh() {
+  //obtiene los datos que quieres
+  getData() async {
+    final Welcome hello = await newPost();
     setState(() {
       if (mounted) {
-        fetchPost();
+        hi = hello;
+        lat = double.parse(hi.data.latitud);
+        lng = double.parse(hi.data.longitud);
+        ubi = LatLng(lat, lng);
+        comp = hi.data.compania;
+        unidad = hi.data.idUnidad;
+        fechaf = hi.fechaFinal;
       }
     });
   }
 
+  dif() {
+    var exp = DateTime.parse(fechaf).hour;
+    var exp2 = DateTime.parse(fechaf).minute;
+    var exp3 = DateTime.parse(fechaf).second;
+
+    var dias = DateTime.now().day;
+    var horaActual = DateTime.now().hour;
+    var minActual = DateTime.now().minute;
+    var secActual = DateTime.now().second;
+
+    var diff = exp - horaActual;
+    var diff2 = exp2 - minActual;
+    var diff3 = exp3 - secActual;
+    Duration start = Duration(
+      hours: diff,
+      minutes: diff2,
+      seconds: diff3,
+    ).abs();
+    Duration end = Duration(hours: 0, minutes: 0, seconds: 0);
+
+    return start != end ? start : end;
+  }
+
+  cuentaAtras() => SlideCountdownClock(
+        duration: dif(),
+        slideDirection: SlideDirection.Down,
+        separator: ":",
+        onDone: () {
+          setState(() {
+            if (mounted) {
+              showAlertDialog();
+            }
+          });
+        },
+        textStyle: TextStyle(fontSize: 15, color: Colors.white),
+      );
+
+  Timer timer2;
+
+  @override
+  //estado inicializarod
+  void initState() {
+    //todo lo que este aqui se inicializa
+
+    newPost();
+    getData();
+    //cuando la app abre
+    super.initState();
+
+    //refresh()
+
+    timer2 = Timer.periodic(Duration(seconds: 1), (timer) => {refresh()});
+  }
+
+  // refresquea el url para obtener datos en vivo
+  refresh() {
+    setState(() {
+      if (mounted) {
+        getData();
+        newPost();
+      }
+    });
+  }
+
+  //finaliza los estados
   @override
   void dispose() {
+    newPost();
+    getData();
+    dif();
     timer2?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          actions: [
-            Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FutureBuilder<Post>(
-                    future: widget.post,
-                    builder: (context, AsyncSnapshot snapshot) {
-                      if (snapshot.hasData) {
-                        var unidad = snapshot.data.idUnidad;
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
 
-                        return Text('$unidad');
-                      } else if (snapshot.hasError) {
-                        return Text('Algo ha fallado');
-                      }
-                      return Container(
-                        height: 0.0,
-                        width: 0.0,
-                      );
-                    },
-                  )
-                ],
-              ),
+          //barra superior que muesta informacion obtenida del get
+          appBar: AppBar(
+            elevation: 4,
+            backgroundColor: Colors.white,
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.only(right: 20),
+                  child: Image.asset(
+                    'assets/images/fmc.png',
+                    fit: BoxFit.fitHeight,
+                    height: 50,
+                  ),
+                ),
+                SizedBox(
+                  width: 15,
+                ),
+                Container(
+                  child: Text(
+                    'FollowMe',
+                    style: TextStyle(
+                        fontFamily: 'Roboto',
+                        color: Colors.lightBlue[900],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25),
+                  ),
+                )
+              ],
             ),
-            Padding(
+            actions: [
+              //elementos de la app bar
+
+              Padding(
                 padding: EdgeInsets.only(right: 20.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    FutureBuilder<Post>(
-                      future: widget.post,
-                      builder: (context, AsyncSnapshot snapshot) {
-                        if (snapshot.hasData) {
-                          var unidad = snapshot.data.compania;
-                          print('Hola aqui estoy: $unidad');
-                          return Text('$unidad');
-                        } else if (snapshot.hasError) {
-                          return Text('Halgo ha fallado');
-                        }
-                        return Container(
-                          height: 0.0,
-                          width: 0.0,
-                        );
-                      },
-                    )
+                    unidad != null
+                        ? Text(
+                            '$unidad',
+                            style: TextStyle(
+                                color: Colors.lightBlue[900],
+                                fontWeight: FontWeight.w500),
+                          )
+                        : Container(),
                   ],
+                ),
+              ),
+              Padding(
+                  padding: EdgeInsets.only(right: 20.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      comp != null
+                          ? Text('$comp',
+                              style: TextStyle(
+                                  color: Colors.lightBlue[900],
+                                  fontWeight: FontWeight.w500))
+                          : Container()
+                    ],
+                  )),
+            ],
+          ),
+
+          //llama al google map
+          body: ubi != null
+              ? GglMap(
+                  ubi: ubi,
+                  fechita: cuentaAtras(),
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
                 )),
-            Padding(
-                padding: EdgeInsets.only(right: 20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text('$greeting')],
-                )),
-          ],
-        ),
-        body: Mapas(
-          post: fetchPost(),
-        ));
+    );
+  }
+
+  showAlertDialog() {
+    Widget okButton = FlatButton(
+        onPressed: () {
+          if (mounted) {
+            Navigator.of(context)..pop()..pop();
+          }
+        },
+        child: Text('OK'));
+
+    AlertDialog alert = AlertDialog(
+      title: Text('Atención!'),
+      content: Text('Ha finalizado el tiempo de rastreo, gracias!'),
+      actions: [okButton],
+    );
+
+    showDialog(context: context, builder: (context) => alert);
+  }
+
+  showSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Su sesion ha expirado! Gracias.')));
   }
 }

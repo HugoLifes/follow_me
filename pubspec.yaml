@@ -34,15 +34,16 @@ dependencies:
   flutter_polyline_points: ^0.2.4
   google_maps_webservice: ^0.0.19
   geolocator: ^6.2.1
-  geopoint: ^0.8.0
   syncfusion_flutter_gauges: ^19.1.56
   jwt_decoder: ^2.0.1
   shared_preferences: ^2.0.5
   custom_timer: ^0.0.3
   provider: ^3.1.0
-  slimy_card: ^1.0.4
   flip_card: ^0.5.0
-  alertify: "^0.0.1"
+  ai_awesome_message: ^2.2.0
+  slide_countdown_clock: ^1.0.3
+  
+  
   
 
 

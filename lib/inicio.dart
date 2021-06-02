@@ -8,7 +8,6 @@ import 'package:follow_me/main.dart';
 import 'package:follow_me/methods/textForms.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:follow_me/methods/json2.dart';
-import 'package:slimy_card/slimy_card.dart';
 
 SharedPreferences prefs;
 
@@ -20,7 +19,8 @@ class Inicio extends StatefulWidget {
 class _InicioState extends State<Inicio> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController tk = TextEditingController();
-  bool _autovalidate = false;
+  GlobalKey<FlipCardState> cardKey = GlobalKey<FlipCardState>();
+
   Posting post;
   var idUnida;
   bool press = false;
@@ -29,6 +29,7 @@ class _InicioState extends State<Inicio> {
   String name;
   Future<Send> sendData;
   Future<Send> send;
+  bool validate = false;
 
   Future<Posting> newMethod(String tokn) async {
     final Uri url = Uri.parse(
@@ -38,7 +39,7 @@ class _InicioState extends State<Inicio> {
     });
 
     if (response.statusCode == 200) {
-      final String data = response.body;
+      var data = response.body;
 
       return postingFromJson(data);
     } else {
@@ -46,29 +47,46 @@ class _InicioState extends State<Inicio> {
     }
   }
 
+  showAlertDialog() {
+    // ignore: deprecated_member_use
+    Widget okButton = FlatButton(
+        onPressed: () {
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Text('OK'));
+
+    AlertDialog alert = AlertDialog(
+      title: Text('Atención!'),
+      content: Text('Ha finalizado el tiempo de rastreo, gracias!'),
+      actions: [okButton],
+    );
+
+    showDialog(context: context, builder: (context) => alert);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              centerTitle: true,
+              title: Text(
+                '¡Bienvenido!',
+                style: TextStyle(
+                    color: Color(0xFF444444),
+                    fontSize: 35,
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
             resizeToAvoidBottomInset: false,
             body: SafeArea(
               child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [
-                        Colors.white,
-                        Colors.lightBlue[300],
-                        Colors.lightBlue[400]
-                      ],
-                      stops: [
-                        0.1,
-                        0.6,
-                        0.7
-                      ],
-                      begin: FractionalOffset.topCenter,
-                      end: FractionalOffset.bottomCenter),
-                ),
+                decoration: BoxDecoration(color: Colors.white),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -91,37 +109,63 @@ class _InicioState extends State<Inicio> {
       height: 250,
       width: 350,
       decoration: BoxDecoration(
+          border:
+              Border.all(color: Color(0xFF444444), style: BorderStyle.solid),
+          borderRadius: BorderRadius.circular(25),
           gradient: LinearGradient(
-              colors: [Colors.red[100], Colors.red[400], Colors.red[500]],
-              stops: [0.1, 0.6, 0.7],
+              colors: [
+                Colors.white,
+                Colors.lightBlue[300],
+                Colors.lightBlue[400]
+              ],
+              stops: [
+                0.1,
+                0.6,
+                0.7
+              ],
               begin: FractionalOffset.topRight,
               end: FractionalOffset.bottomLeft)),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             'Opss!',
-            style: TextStyle(),
+            style: TextStyle(
+                fontSize: 30,
+                fontFamily: 'Roboto',
+                color: Colors.red,
+                fontWeight: FontWeight.w800),
           ),
-          Text('No haz introducido un token :(')
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            'No has introducido un token :(',
+            style: TextStyle(
+                fontSize: 19,
+                fontFamily: 'Roboto',
+                color: Colors.red,
+                fontWeight: FontWeight.w800),
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Text(
+            'Volver a intoducir',
+            style: TextStyle(
+                fontSize: 15,
+                fontFamily: 'Roboto',
+                color: Colors.red,
+                fontWeight: FontWeight.w800),
+          )
         ],
       ));
 
   flip() => FlipCard(
+        key: cardKey,
+        flipOnTouch: validate,
         front: textBox(),
         back: errorLog(),
-      );
-  slimyCard() => Container(
-        child: SlimyCard(
-          color: Colors.lightBlue[300],
-          width: 400,
-          topCardHeight: 250,
-          bottomCardHeight: 200,
-          borderRadius: 15,
-          topCardWidget: textBox(),
-          bottomCardWidget: errorLog(),
-          slimeEnabled: true,
-        ),
       );
 
   imageContainer() => Column(
@@ -129,16 +173,7 @@ class _InicioState extends State<Inicio> {
         children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Bienvenido',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 51,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.bold),
-              ),
-            ],
+            children: [],
           ),
           Container(
             height: MediaQuery.of(context).size.height / 2,
@@ -156,11 +191,13 @@ class _InicioState extends State<Inicio> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         child: Container(
           decoration: BoxDecoration(
+              border: Border.all(
+                  color: Color(0xFF444444), style: BorderStyle.solid),
               gradient: LinearGradient(
                   colors: [
                     Colors.white,
-                    Colors.lightBlue[300],
-                    Colors.lightBlue[400]
+                    Colors.lightBlue[600],
+                    Colors.lightBlue[700]
                   ],
                   stops: [
                     0.2,
@@ -171,20 +208,39 @@ class _InicioState extends State<Inicio> {
                   end: FractionalOffset.bottomLeft),
               borderRadius: BorderRadius.circular(25)),
           alignment: Alignment.center,
-          height: 250,
+          height: 260,
           width: 350,
           child: Form(
             key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                Text(
+                  'Introduce aqui tu token!',
+                  style: TextStyle(
+                      color: Color(0xFF444444),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                      fontFamily: 'Montserrat'),
+                ),
                 CustomTextField(
                   controller: tk,
-                  icon: Icon(Icons.vpn_key),
-                  hint: 'Introduce llave de rastreo',
+                  icon: Icon(
+                    Icons.vpn_key,
+                    color: Colors.white,
+                  ),
+                  hint: 'Introducir llave aqui',
                   validator: (nameValidator) {
                     if (nameValidator == null || nameValidator.isEmpty) {
-                      return 'Porfa';
+                      setState(() {
+                        if (mounted) {
+                          if (cardKey.currentState.isFront == true) {
+                            cardKey.currentState.toggleCard();
+                            validate = true;
+                          }
+                        }
+                      });
+                      return ' ';
                     }
                     return null;
                   },
@@ -209,10 +265,17 @@ class _InicioState extends State<Inicio> {
               final Posting posting = await newMethod(token);
               setState(() {
                 post = posting;
+
                 dataOff(post.unitId);
 
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (_) => MyApp()));
+                if (post.value == 0) {
+                  showAlertDialog();
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => MyHomePage()),
+                  );
+                }
               });
             }
           },

@@ -40,7 +40,7 @@ class Post {
 class Send {
   int value;
   String msn;
-  String idU;
+  int idU;
 
   Send({this.value, this.msn, this.idU});
 

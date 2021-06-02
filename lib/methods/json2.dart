@@ -19,23 +19,23 @@ class Welcome {
 
   int value;
   String message;
-  DateTime fechaInicial;
-  DateTime fechaFinal;
+  String fechaInicial;
+  String fechaFinal;
   Data data;
 
   factory Welcome.fromJson(Map<String, dynamic> json) => Welcome(
         value: json["value"],
         message: json["message"],
-        fechaInicial: DateTime.parse(json["fechaInicial"]),
-        fechaFinal: DateTime.parse(json["fechaFinal"]),
+        fechaInicial: json["fechaInicial"],
+        fechaFinal: json["fechaFinal"],
         data: Data.fromJson(json["data"]),
       );
 
   Map<String, dynamic> toJson() => {
         "value": value,
         "message": message,
-        "fechaInicial": fechaInicial.toIso8601String(),
-        "fechaFinal": fechaFinal.toIso8601String(),
+        "fechaInicial": fechaInicial,
+        "fechaFinal": fechaFinal,
         "data": data.toJson(),
       };
 }
@@ -97,7 +97,7 @@ class Posting {
 
   int value;
   String message;
-  String unitId;
+  int unitId;
 
   factory Posting.fromJson(Map<String, dynamic> json) => Posting(
         value: json["value"],
