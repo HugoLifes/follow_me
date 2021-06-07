@@ -1,85 +1,48 @@
-import 'dart:async';
-import 'package:flutter/rendering.dart';
-import 'package:follow_me/methods/datos.dart';
-import 'package:follow_me/methods/responsive.dart';
-import 'package:intl/intl.dart';
-import 'package:custom_timer/custom_timer.dart';
-import 'package:follow_me/main.dart';
-import 'package:follow_me/methods/json2.dart';
-
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
+class NaviewResp extends StatefulWidget {
+  final screenWidth;
+  final comp;
+  final token;
+  final unidad;
+  final onlyDate;
+  final hora;
+  final mins;
+  final secs;
 
-SharedPreferences prefs;
-
-// ignore: must_be_immutable
-class GglMap extends StatefulWidget {
-  GglMap({
-    Key key,
-    this.ubi,
-    this.contador,
-    this.token,
-  }) : super(key: key);
-  LatLng ubi;
-  String token;
-  var contador;
+  NaviewResp(
+      {this.hora,
+      this.unidad,
+      this.mins,
+      this.secs,
+      this.comp,
+      this.onlyDate,
+      this.token,
+      this.screenWidth});
 
   @override
-  _GglMapState createState() => _GglMapState();
+  _NaviewResp createState() => _NaviewResp();
 }
 
-class _GglMapState extends State<GglMap> {
-  Welcome hi;
-  NaviewResp naviewResp = new NaviewResp();
-  TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  int _selectedIndex = 0;
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+class _NaviewResp extends State<NaviewResp>
+    with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+        duration: Duration(milliseconds: 100), vsync: this);
   }
 
-  var unidad;
-  var comp;
-  var onlyDate;
-  var fechaf;
-  GoogleMapController _googleMapController;
-  Map<MarkerId, Marker> marker2 = <MarkerId, Marker>{};
-  // variable para setear varias ubicaciones
-  List<LatLng> ubis = [];
-  // variable para setear varios markadores
-  List<Marker> marker = [];
-  Timer timerCamera;
-  Timer timer;
-  var hora;
-  var mins;
-  var secs;
-  Timer timer2;
-  CustomTimerController controller = new CustomTimerController();
-
-  getData2() async {
-    final Welcome hello = await newPost();
-    setState(() {
-      hi = hello;
-      comp = hi.data.compania;
-      unidad = hi.data.idUnidad;
-      fechaf = hi.fechaFinal;
-
-      Future.delayed(
-          Duration(seconds: 2),
-          () => {
-                onlyDate =
-                    DateFormat("dd-MM-yyyy").format(DateTime.parse(fechaf)),
-                hora = DateTime.parse(fechaf).hour,
-                mins = DateTime.parse(fechaf).minute,
-                secs = DateTime.parse(fechaf).second,
-              });
-    });
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
-  navView() => Column(
+  @override
+  Widget build(BuildContext context) => Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
@@ -180,10 +143,10 @@ class _GglMapState extends State<GglMap> {
                                       children: [
                                         // por alguna razon lo espacion cuentan
                                         // no borrar espacios
-                                        comp != null
+                                        widget.comp != null
                                             ? Container(
                                                 child: Text(
-                                                    'Compañia: $comp    ',
+                                                    'Compañia: ${widget.comp}    ',
                                                     style: TextStyle(
                                                         color: Colors
                                                             .lightBlue[900],
@@ -202,10 +165,10 @@ class _GglMapState extends State<GglMap> {
                                                   fontWeight: FontWeight.w600)),
                                         ),
 
-                                        unidad != null
+                                        widget.unidad != null
                                             ? Container(
                                                 child: Text(
-                                                  'Unidad: $unidad             ',
+                                                  'Unidad: ${widget.unidad}             ',
                                                   style: TextStyle(
                                                       color:
                                                           Colors.lightBlue[900],
@@ -267,8 +230,9 @@ class _GglMapState extends State<GglMap> {
                                       style: BorderStyle.solid)),
                               child: Container(
                                 padding: EdgeInsets.all(8),
-                                child: onlyDate != null
-                                    ? Text('Fecha de llegada: $onlyDate',
+                                child: widget.onlyDate != null
+                                    ? Text(
+                                        'Fecha de llegada: ${widget.onlyDate}',
                                         style: TextStyle(
                                             fontSize: 19,
                                             fontWeight: FontWeight.w600))
@@ -289,11 +253,11 @@ class _GglMapState extends State<GglMap> {
                                       style: BorderStyle.solid)),
                               child: Container(
                                   padding: EdgeInsets.all(8),
-                                  child: hora != null &&
-                                          mins != null &&
-                                          secs != null
+                                  child: widget.hora != null &&
+                                          widget.mins != null &&
+                                          widget.secs != null
                                       ? Text(
-                                          'Hora estimada: $hora:$mins:$secs  Hora Central',
+                                          'Hora estimada: ${widget.hora}:${widget.mins}:${widget.secs}  Hora Central',
                                           style: TextStyle(
                                               fontSize: 19,
                                               fontWeight: FontWeight.w600))
@@ -313,254 +277,4 @@ class _GglMapState extends State<GglMap> {
           ),
         ],
       );
-
-  @override
-  // inicializa algunos estados como el seteo de las ubicaciones y seteo de markers
-  void initState() {
-    newPost();
-    getData2();
-    // contador para refrescar marcadores
-    timerCamera =
-        Timer.periodic(Duration(seconds: 50), (timer) => {moveCamera()});
-
-    timer = Timer.periodic(
-        Duration(seconds: 1), (timer) => {addMarkers(), refresh()});
-
-    super.initState();
-  }
-
-  //se encarga de refrescar y añadir un nuevo elemento cuando se actualiza
-  refresh() async {
-    setState(() {
-      if (mounted) {
-        addUbis();
-      }
-    });
-  }
-
-  //funcion que añade nuevas posiciones al arreglo
-  addUbis() {
-    // si la la latitud es dif y la long tambien setea si no
-    ubis.add(widget.ubi);
-    if (widget.ubi != widget.ubi) {
-      setState(() {
-        if (mounted) {
-          ubis.add(widget.ubi);
-        }
-      });
-    } else {
-      ubis.add(widget.ubi);
-
-      if (ubis.length <= 10) {
-        ubis.removeRange(0, 8);
-      }
-      ubis.clear();
-    }
-  }
-
-  //la camara hay que intentar moverla
-  moveCamera() {
-    var update = CameraPosition(
-        target: LatLng(
-            marker.first.position.latitude, marker.first.position.longitude),
-        zoom: 15);
-    var cameraUpdate = CameraUpdate.newCameraPosition(update);
-    _googleMapController.animateCamera(cameraUpdate);
-  }
-
-  // añade los markadores de la lista
-  addMarkers() {
-    //recorre el arreglo de las posiciones
-    for (int i = 0; i < ubis.length; i++) {
-      // setea el primer marcador con la primera posicion del arreglo
-      Marker mark2 = Marker(
-          markerId: MarkerId('$ubis'),
-          position: ubis[i],
-          infoWindow: InfoWindow(title: 'Unidad a rastrear'));
-      marker.clear();
-
-      //si el marcador es diferente al anterior setea
-      if (mark2.position != mark2.position) {
-        setState(() {
-          if (mounted) {
-            marker.add(mark2.clone());
-          }
-        });
-      } else {
-        // borra las posiciones mas alla del largo permitido
-        marker.add(mark2.clone());
-        if (marker.length > 2) {
-          marker.removeRange(0, 1);
-        }
-
-        // saca los maximos y minimos para dar angulo
-        //moveCamera();
-      }
-    }
-  }
-
-  //cancela estados
-  @override
-  void dispose() {
-    super.dispose();
-    newPost();
-    getData2();
-    timer2?.cancel();
-    marker.clear();
-    timerCamera?.cancel();
-    timer?.cancel();
-    _googleMapController.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final List<Widget> _children = [
-      googlemapa(screenWidth),
-      DatosView(
-        hora: hora,
-        unidad: unidad,
-        mins: mins,
-        secs: secs,
-        comp: comp,
-        onlyDate: onlyDate,
-        token: widget.token,
-      )
-    ];
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        bottomNavigationBar: screenWidth <= 880
-            ? BottomNavigationBar(
-                onTap: _onItemTapped,
-                elevation: 5,
-                currentIndex: _selectedIndex,
-                items: const <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                        icon: Icon(Icons.map), label: 'Mapa'),
-                    BottomNavigationBarItem(
-                        icon: Icon(Icons.data_usage), label: 'Info')
-                  ])
-            : null,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth >= 880) {
-              return Stack(
-                children: [
-                  Container(
-                    // la Web view se basa mediante la data obtenida por la altura entre 2
-                    height: MediaQuery.of(context).size.height / 1.65,
-                    width: MediaQuery.of(context).size.width,
-                    // el mapa y sus caracteristicas
-                    child: GoogleMap(
-                      myLocationEnabled: true,
-                      mapType: MapType.normal,
-                      //onCameraMoveStarted: moveCamera(),
-                      zoomGesturesEnabled: true,
-                      zoomControlsEnabled: false,
-                      markers: Set<Marker>.of(marker),
-                      initialCameraPosition: CameraPosition(
-                          target: widget.ubi != null
-                              ? widget.ubi
-                              : LatLng(28.6353, -106.089),
-                          zoom: 15),
-                      //markers: markers,
-                      onMapCreated: _mapController,
-                    ),
-                  ),
-
-                  //bottom bar view, y sus elementos, tipos de vistas y alineaciones
-
-                  expire(screenWidth),
-                  // funcion de la barra de estados inferioi
-                  navView()
-                ],
-              );
-            } else {
-              return _children[_selectedIndex];
-            }
-          },
-        ));
-  }
-
-  // nada mas muestra el tiempo que esta transcurriendo
-  expire(screenWidth) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.all(15),
-          width: 209,
-          height: 120,
-          child: Card(
-              color: Color(0xFF444444),
-              elevation: 4,
-              child: Padding(
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  children: [
-                    Container(
-                      alignment: Alignment.topCenter,
-                      child: Text(
-                        'Tiempo de expiración',
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 7,
-                    ),
-                    Container(
-                        alignment: Alignment.bottomCenter,
-                        child: widget.contador)
-                  ],
-                ),
-              )),
-        ),
-      ],
-    );
-  }
-
-  googlemapa(screenWidth) {
-    return Stack(
-      children: [
-        Container(
-          // la Web view se basa mediante la data obtenida por la altura entre 2
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          // el mapa y sus caracteristicas
-          child: GoogleMap(
-            myLocationEnabled: true,
-            mapType: MapType.normal,
-            //onCameraMoveStarted: moveCamera(),
-            zoomGesturesEnabled: true,
-            zoomControlsEnabled: false,
-            markers: Set<Marker>.of(marker),
-            initialCameraPosition: CameraPosition(
-                target:
-                    widget.ubi != null ? widget.ubi : LatLng(28.6353, -106.089),
-                zoom: 15),
-            //markers: markers,
-            onMapCreated: _mapController,
-          ),
-        ),
-
-        //bottom bar view, y sus elementos, tipos de vistas y alineaciones
-
-        expire(screenWidth),
-        // funcion de la barra de estados inferioi
-      ],
-    );
-  }
-
-  //controlador de google maps, aqui se manejan estados del mapa
-  _mapController(GoogleMapController controller) {
-    setState(() {
-      if (mounted) {
-        addMarkers();
-        _googleMapController = controller;
-      }
-    });
-  }
 }

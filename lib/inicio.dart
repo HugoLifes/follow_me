@@ -47,7 +47,11 @@ class _InicioState extends State<Inicio> {
     }
   }
 
+  //alerta que se muestra cuando el token ha expirado o no
   showAlertDialog() {
+    // ignore: deprecated_member_use
+
+    // se activa el boton cuando
     // ignore: deprecated_member_use
     Widget okButton = FlatButton(
         onPressed: () {
@@ -59,7 +63,7 @@ class _InicioState extends State<Inicio> {
 
     AlertDialog alert = AlertDialog(
       title: Text('Atención!'),
-      content: Text('Ha finalizado el tiempo de rastreo, gracias!'),
+      content: Text('El token es incorrecto o ha expirado!'),
       actions: [okButton],
     );
 
@@ -68,221 +72,503 @@ class _InicioState extends State<Inicio> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.white,
-              centerTitle: true,
-              title: Text(
-                '¡Bienvenido!',
-                style: TextStyle(
-                    color: Color(0xFF444444),
-                    fontSize: 35,
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
             resizeToAvoidBottomInset: false,
-            body: SafeArea(
-              child: Container(
-                decoration: BoxDecoration(color: Colors.white),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            appBar: AppBar(
+                backgroundColor: Colors.white,
+                centerTitle: true,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    // aqui esta la imagen
-                    imageContainer(),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // aqui va el textBox
-                        Container(child: flip())
-                      ],
+                    Container(
+                      padding: EdgeInsets.only(right: 20),
+                      child: Image.asset(
+                        'assets/images/fmc.png',
+                        fit: BoxFit.fitHeight,
+                        height: 50,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Container(
+                      child: Text(
+                        'FollowMe',
+                        style: TextStyle(
+                            fontFamily: 'Roboto',
+                            color: Colors.lightBlue[900],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 25),
+                      ),
                     )
                   ],
-                ),
-              ),
+                )),
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth >= 600) {
+                  return SafeArea(
+                    child: Container(
+                      decoration: BoxDecoration(color: Colors.white),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // aqui esta la imagen
+                          imageContainer(screenWidth, screenHeight),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // aqui va el textBox
+                              Container(child: flip(screenWidth, screenHeight))
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                } else {
+                  return SafeArea(
+                    child: Container(
+                      decoration: BoxDecoration(color: Colors.white),
+                      child: ListView(
+                        children: [
+                          // aqui esta la imagen
+                          //imageContainer(screenWidth, screenHeight),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          Center(
+                            child: Text(
+                              'Comencemos!',
+                              style: TextStyle(
+                                  color: Colors.lightBlue[900],
+                                  fontSize: 35,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          Center(
+                            child: Text(
+                              'Introduce aqui tu token!',
+                              style: TextStyle(
+                                  color: Color(0xFF444444),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
+                                  fontFamily: 'Montserrat'),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // aqui va el textBox
+                              Container(child: flip(screenWidth, screenHeight))
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
             )));
   }
 
-  errorLog() => Container(
-      height: 250,
-      width: 350,
-      decoration: BoxDecoration(
-          border:
-              Border.all(color: Color(0xFF444444), style: BorderStyle.solid),
-          borderRadius: BorderRadius.circular(25),
-          gradient: LinearGradient(
-              colors: [
-                Colors.white,
-                Colors.lightBlue[300],
-                Colors.lightBlue[400]
-              ],
-              stops: [
-                0.1,
-                0.6,
-                0.7
-              ],
-              begin: FractionalOffset.topRight,
-              end: FractionalOffset.bottomLeft)),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Opss!',
-            style: TextStyle(
-                fontSize: 30,
-                fontFamily: 'Roboto',
-                color: Colors.red,
-                fontWeight: FontWeight.w800),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            'No has introducido un token :(',
-            style: TextStyle(
-                fontSize: 19,
-                fontFamily: 'Roboto',
-                color: Colors.red,
-                fontWeight: FontWeight.w800),
-          ),
-          SizedBox(
-            height: 25,
-          ),
-          Text(
-            'Volver a intoducir',
-            style: TextStyle(
-                fontSize: 15,
-                fontFamily: 'Roboto',
-                color: Colors.red,
-                fontWeight: FontWeight.w800),
-          )
-        ],
-      ));
-
-  flip() => FlipCard(
-        key: cardKey,
-        flipOnTouch: validate,
-        front: textBox(),
-        back: errorLog(),
-      );
-
-  imageContainer() => Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [],
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height / 2,
-            width: MediaQuery.of(context).size.width / 2,
-            decoration: new BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage('assets/images/fm.png'),
-                  fit: BoxFit.fitHeight),
-            ),
-          ),
-        ],
-      );
-
-  textBox() => Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-        child: Container(
+  // la parte trasera del funcion flip
+  // si se desea agregar otro añdido, checar aqui y checar pub dev flip
+  errorLog(screenWidth, screenHeight) => screenWidth >= 600
+      ? Container(
+          height: MediaQuery.of(context).size.height / 3,
+          width: MediaQuery.of(context).size.width / 3,
           decoration: BoxDecoration(
               border: Border.all(
                   color: Color(0xFF444444), style: BorderStyle.solid),
+              borderRadius: BorderRadius.circular(25),
               gradient: LinearGradient(
                   colors: [
                     Colors.white,
-                    Colors.lightBlue[600],
-                    Colors.lightBlue[700]
+                    Colors.lightBlue[300],
+                    Colors.lightBlue[400]
                   ],
                   stops: [
-                    0.2,
-                    0.7,
-                    0.8
+                    0.1,
+                    0.6,
+                    0.7
                   ],
                   begin: FractionalOffset.topRight,
-                  end: FractionalOffset.bottomLeft),
-              borderRadius: BorderRadius.circular(25)),
-          alignment: Alignment.center,
-          height: 260,
-          width: 350,
-          child: Form(
-            key: _formKey,
+                  end: FractionalOffset.bottomLeft)),
+          child: Container(
+            height: MediaQuery.of(context).size.height / 3,
+            width: MediaQuery.of(context).size.width / 3.6,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Introduce aqui tu token!',
+                  'Opss!',
                   style: TextStyle(
-                      color: Color(0xFF444444),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                      fontFamily: 'Montserrat'),
+                      fontSize: 30,
+                      fontFamily: 'Roboto',
+                      color: Colors.red,
+                      fontWeight: FontWeight.w800),
                 ),
-                CustomTextField(
-                  controller: tk,
-                  icon: Icon(
-                    Icons.vpn_key,
-                    color: Colors.white,
-                  ),
-                  hint: 'Introducir llave aqui',
-                  validator: (nameValidator) {
-                    if (nameValidator == null || nameValidator.isEmpty) {
-                      setState(() {
-                        if (mounted) {
-                          if (cardKey.currentState.isFront == true) {
-                            cardKey.currentState.toggleCard();
-                            validate = true;
-                          }
-                        }
-                      });
-                      return ' ';
-                    }
-                    return null;
-                  },
+                SizedBox(
+                  height: 20,
                 ),
-                botonCheck()
+                Text(
+                  'No has introducido un token :(',
+                  style: TextStyle(
+                      fontSize: 19,
+                      fontFamily: 'Roboto',
+                      color: Colors.red,
+                      fontWeight: FontWeight.w800),
+                ),
+                SizedBox(
+                  height: 25,
+                ),
+                Text(
+                  'Volver a intoducir',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: 'Roboto',
+                      color: Colors.red,
+                      fontWeight: FontWeight.w800),
+                )
               ],
             ),
-          ),
-        ),
+          ))
+      // parte responsiva
+      : Container(
+          height: 250,
+          width: 300,
+          decoration: BoxDecoration(
+              border: Border.all(
+                  color: Color(0xFF444444), style: BorderStyle.solid),
+              borderRadius: BorderRadius.circular(25),
+              gradient: LinearGradient(
+                  colors: [
+                    Colors.white,
+                    Colors.lightBlue[300],
+                    Colors.lightBlue[400]
+                  ],
+                  stops: [
+                    0.1,
+                    0.6,
+                    0.7
+                  ],
+                  begin: FractionalOffset.topRight,
+                  end: FractionalOffset.bottomLeft)),
+          child: Container(
+            height: 500,
+            width: 500,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Opss!',
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontFamily: 'Roboto',
+                      color: Colors.red,
+                      fontWeight: FontWeight.w800),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  'No has introducido un token :(',
+                  style: TextStyle(
+                      fontSize: 19,
+                      fontFamily: 'Roboto',
+                      color: Colors.red,
+                      fontWeight: FontWeight.w800),
+                ),
+                SizedBox(
+                  height: 25,
+                ),
+                Text(
+                  'Volver a intoducir',
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: 'Roboto',
+                      color: Colors.red,
+                      fontWeight: FontWeight.w800),
+                )
+              ],
+            ),
+          ));
+
+  // estado que voltea la tarketa
+  flip(screenWidth, screenHeight) => FlipCard(
+        key: cardKey,
+        flipOnTouch: validate,
+        front: textBox(screenWidth, screenHeight),
+        back: errorLog(screenWidth, screenHeight),
       );
 
-  botonCheck() => Container(
-        width: 140,
-        height: 80,
-        padding: EdgeInsets.only(bottom: 30),
-        child: MaterialButton(
-          elevation: 5,
-          color: Color(0xFF444444),
-          onPressed: () async {
-            final String token = tk.text;
-            if (_formKey.currentState.validate()) {
-              final Posting posting = await newMethod(token);
-              setState(() {
-                post = posting;
-
-                dataOff(post.unitId);
-
-                if (post.value == 0) {
-                  showAlertDialog();
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => MyHomePage()),
-                  );
-                }
-              });
-            }
-          },
-          child: Text(
-            'Buscar',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
+//dimensiones de las imagenes
+  imageContainer(screenWidth, screenHeight) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          screenWidth >= 600
+              ? Container(
+                  height: MediaQuery.of(context).size.height / 2,
+                  width: MediaQuery.of(context).size.width / 2,
+                  decoration: new BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/images/fm.png'),
+                        fit: BoxFit.fitHeight),
+                  ),
+                )
+              // desde aqui
+              //Parte responsiva
+              : Container(
+                  height: 200,
+                  width: 200,
+                  decoration: new BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/images/fm.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+        ],
       );
+
+  textBox(screenWidth, screenHeight) => screenWidth >= 600
+      ? Container(
+          height: MediaQuery.of(context).size.height / 3,
+          width: MediaQuery.of(context).size.width / 3.5,
+          child: Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+            child: Container(
+              height: MediaQuery.of(context).size.height / 3,
+              width: MediaQuery.of(context).size.width / 3,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Color(0xFF444444), style: BorderStyle.solid),
+                  gradient: LinearGradient(
+                      colors: [
+                        Colors.white,
+                        Colors.lightBlue[600],
+                        Colors.lightBlue[700]
+                      ],
+                      stops: [
+                        0.2,
+                        0.7,
+                        0.8
+                      ],
+                      begin: FractionalOffset.topRight,
+                      end: FractionalOffset.bottomLeft),
+                  borderRadius: BorderRadius.circular(25)),
+              alignment: Alignment.center,
+              child: Form(
+                key: _formKey,
+                child: Container(
+                  height: MediaQuery.of(context).size.height / 3,
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        'Introduce aqui tu token!',
+                        style: TextStyle(
+                            color: Color(0xFF444444),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                            fontFamily: 'Montserrat'),
+                      ),
+
+                      //definicion del text box
+                      Container(
+                        child: CustomTextField(
+                          controller: tk,
+                          icon: Icon(
+                            Icons.vpn_key,
+                            color: Colors.white,
+                          ),
+                          hint: 'Introducir llave aqui',
+
+                          //validaciones para no entrar con cualquier cosa
+                          validator: (nameValidator) {
+                            if (nameValidator == null ||
+                                nameValidator.isEmpty) {
+                              setState(() {
+                                if (mounted) {
+                                  if (cardKey.currentState.isFront == true) {
+                                    cardKey.currentState.toggleCard();
+                                    validate = true;
+                                  }
+                                }
+                              });
+                              return ' ';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      botonCheck(screenWidth, screenHeight)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+
+      //version responva de la imagen
+      : Container(
+          height: 250,
+          width: 250,
+          child: Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+            child: Container(
+              height: 200,
+              width: 300,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Color(0xFF444444), style: BorderStyle.solid),
+                  gradient: LinearGradient(
+                      colors: [
+                        Colors.white,
+                        Colors.lightBlue[600],
+                        Colors.lightBlue[700]
+                      ],
+                      stops: [
+                        0.2,
+                        0.7,
+                        0.8
+                      ],
+                      begin: FractionalOffset.topRight,
+                      end: FractionalOffset.bottomLeft),
+                  borderRadius: BorderRadius.circular(25)),
+              alignment: Alignment.center,
+              child: Form(
+                key: _formKey,
+                child: Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      //definicion del text box
+                      Container(
+                        child: CustomTextField(
+                          controller: tk,
+                          icon: Icon(
+                            Icons.vpn_key,
+                            color: Colors.white,
+                          ),
+                          hint: 'Introducir llave aqui',
+
+                          //validaciones para no entrar con cualquier cosa
+                          validator: (nameValidator) {
+                            if (nameValidator == null ||
+                                nameValidator.isEmpty) {
+                              setState(() {
+                                if (mounted) {
+                                  if (cardKey.currentState.isFront == true) {
+                                    cardKey.currentState.toggleCard();
+                                    validate = true;
+                                  }
+                                }
+                              });
+                              return ' ';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      botonCheck(screenWidth, screenHeight)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+  // boton que maneja el estado y hace la solicitud post
+  botonCheck(screenWidth, screenHeight) => screenWidth >= 600
+      ? Container(
+          height: MediaQuery.of(context).size.height / 10,
+          width: MediaQuery.of(context).size.width / 10.3,
+          padding: EdgeInsets.only(bottom: 30),
+          child: MaterialButton(
+            elevation: 5,
+            color: Color(0xFF444444),
+            onPressed: () async {
+              final String token = tk.text;
+              if (_formKey.currentState.validate()) {
+                final Posting posting = await newMethod(token);
+                setState(() {
+                  post = posting;
+                  // llama a la funcion que guarda en memoria para
+                  dataOff(post.unitId);
+
+                  // confirmacion si el token aun es valido
+                  if (post.value == 0) {
+                    showAlertDialog();
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => MyHomePage(
+                                token: token,
+                              )),
+                    );
+                  }
+                });
+              }
+            },
+            child: Text(
+              'Buscar',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        )
+      // parte responsiva
+      : Container(
+          height: 80,
+          width: 100,
+          padding: EdgeInsets.only(bottom: 30),
+          child: MaterialButton(
+            elevation: 5,
+            color: Color(0xFF444444),
+            onPressed: () async {
+              final String token = tk.text;
+              if (_formKey.currentState.validate()) {
+                final Posting posting = await newMethod(token);
+                setState(() {
+                  post = posting;
+                  // llama a la funcion que guarda en memoria para
+                  dataOff(post.unitId);
+
+                  // confirmacion si el token aun es valido
+                  if (post.value == 0) {
+                    showAlertDialog();
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => MyHomePage(
+                                token: token,
+                              )),
+                    );
+                  }
+                });
+              }
+            },
+            child: Text(
+              'Buscar',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
 }
