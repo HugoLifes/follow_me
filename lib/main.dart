@@ -9,6 +9,8 @@ import 'package:slide_countdown_clock/slide_countdown_clock.dart';
 import 'map.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+//correr el proyecto construido
+//flutter run -d chrome --web-renderer html --profile
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -222,7 +224,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
             resizeToAvoidBottomInset: true,
-            //barra superior que muesta informacion obtenida del get
             appBar: AppBar(
               elevation: 4,
               backgroundColor: Colors.white,
@@ -256,6 +257,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ),
 
             //llama al google map
+
             body: ubi != null
                 ? GglMap(
                     token: widget.token,
@@ -268,11 +270,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           begin: Colors.lightBlue[400],
                           end: Colors.green[400])),
                     ),
-                  ))
-
-        // parte responsiva
-
-        );
+                  )));
   }
 
   showAlertDialog() {

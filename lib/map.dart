@@ -105,208 +105,197 @@ class _GglMapState extends State<GglMap> {
                         begin: FractionalOffset.topRight,
                         end: FractionalOffset.bottomLeft)),
                 padding: EdgeInsets.all(15),
-                child: Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // columna principal Transporte y Token
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            // fila de texto token
-                            Container(
-                              width: 350,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    'Token #',
-                                    style: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w700),
-                                  ),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Container(
-                                    child: Text(
-                                      '${widget.token}',
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.red[900]),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            //Datos transportista
-                            Container(
-                              width: 350,
-                              alignment: Alignment.centerLeft,
-                              child: Text('Datos Transportista: ',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                  )),
-                            ),
-
-                            Row(
-                              children: [
-                                Container(
-                                  alignment: Alignment.centerLeft,
-                                  height:
-                                      MediaQuery.of(context).size.height / 8,
-                                  width:
-                                      MediaQuery.of(context).size.width / 3.1,
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(
-                                        color: Colors.black,
-                                        style: BorderStyle.solid),
-                                  ),
-                                  child: Container(
-                                    height: MediaQuery.of(context).size.height,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // por alguna razon lo espacion cuentan
-                                        // no borrar espacios
-                                        comp != null
-                                            ? Container(
-                                                child: Text(
-                                                    'Compañia: $comp    ',
-                                                    style: TextStyle(
-                                                        color: Colors
-                                                            .lightBlue[900],
-                                                        fontSize: 19,
-                                                        fontWeight:
-                                                            FontWeight.w600)),
-                                              )
-                                            : Text(' '),
-
-                                        //width: 100,
-                                        Container(
-                                          child: Text('Caja seca Num: 7823',
-                                              style: TextStyle(
-                                                  color: Colors.lightBlue[900],
-                                                  fontSize: 19,
-                                                  fontWeight: FontWeight.w600)),
-                                        ),
-
-                                        unidad != null
-                                            ? Container(
-                                                child: Text(
-                                                  'Unidad: $unidad             ',
-                                                  style: TextStyle(
-                                                      color:
-                                                          Colors.lightBlue[900],
-                                                      fontSize: 19,
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                ),
-                                              )
-                                            : Text(' '),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-
-                      Container(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Container(
-                              width: 500,
-                              alignment: Alignment.topLeft,
-                              child: Text(
-                                'Datos del envío',
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // columna principal Transporte y Token
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // fila de texto token
+                        Container(
+                          width: 350,
+                          child: Row(
+                            children: [
+                              Text(
+                                'Token #',
                                 style: TextStyle(
                                     fontSize: 30, fontWeight: FontWeight.w700),
                               ),
-                            ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Container(
+                                child: Text(
+                                  '${widget.token}',
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.red[900]),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+
+                        //Datos transportista
+                        Container(
+                          width: 350,
+                          alignment: Alignment.centerLeft,
+                          child: Text('Datos Transportista: ',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              )),
+                        ),
+
+                        Row(
+                          children: [
                             Container(
-                              height: MediaQuery.of(context).size.height / 18,
-                              width: MediaQuery.of(context).size.width / 1.96,
+                              alignment: Alignment.centerLeft,
+                              height: MediaQuery.of(context).size.height / 8,
+                              width: MediaQuery.of(context).size.width / 3.1,
+                              padding: EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                      color: Colors.black,
-                                      style: BorderStyle.solid)),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                    color: Colors.black,
+                                    style: BorderStyle.solid),
+                              ),
                               child: Container(
-                                  padding: EdgeInsets.all(8),
-                                  child: Text(
-                                    'Destino: Interceramic Chihuahua',
-                                    style: TextStyle(
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.w600),
-                                  )),
+                                height: MediaQuery.of(context).size.height,
+                                width: MediaQuery.of(context).size.width,
+                                child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // por alguna razon lo espacion cuentan
+                                    // no borrar espacios
+                                    comp != null
+                                        ? Container(
+                                            child: Text('Compañia: $comp    ',
+                                                style: TextStyle(
+                                                    color:
+                                                        Colors.lightBlue[900],
+                                                    fontSize: 19,
+                                                    fontWeight:
+                                                        FontWeight.w600)),
+                                          )
+                                        : Text(' '),
+
+                                    //width: 100,
+                                    Container(
+                                      child: Text('Caja seca Num: 7823',
+                                          style: TextStyle(
+                                              color: Colors.lightBlue[900],
+                                              fontSize: 19,
+                                              fontWeight: FontWeight.w600)),
+                                    ),
+
+                                    unidad != null
+                                        ? Container(
+                                            child: Text(
+                                              'Unidad: $unidad             ',
+                                              style: TextStyle(
+                                                  color: Colors.lightBlue[900],
+                                                  fontSize: 19,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                          )
+                                        : Text(' '),
+                                  ],
+                                ),
+                              ),
                             ),
-                            Container(
-                              height: MediaQuery.of(context).size.height / 18,
-                              width: MediaQuery.of(context).size.width / 1.96,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white,
-                                  border: Border.all(
-                                      color: Colors.black,
-                                      style: BorderStyle.solid)),
-                              child: Container(
+                          ],
+                        )
+                      ],
+                    ),
+
+                    Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Container(
+                            width: 500,
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'Datos del envío',
+                              style: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          Container(
+                            height: MediaQuery.of(context).size.height / 18,
+                            width: MediaQuery.of(context).size.width / 1.96,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: Colors.black,
+                                    style: BorderStyle.solid)),
+                            child: Container(
                                 padding: EdgeInsets.all(8),
-                                child: onlyDate != null
-                                    ? Text('Fecha de llegada: $onlyDate',
+                                child: Text(
+                                  'Destino: Interceramic Chihuahua',
+                                  style: TextStyle(
+                                      fontSize: 19,
+                                      fontWeight: FontWeight.w600),
+                                )),
+                          ),
+                          Container(
+                            height: MediaQuery.of(context).size.height / 18,
+                            width: MediaQuery.of(context).size.width / 1.96,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                                border: Border.all(
+                                    color: Colors.black,
+                                    style: BorderStyle.solid)),
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              child: onlyDate != null
+                                  ? Text('Fecha de llegada: $onlyDate',
+                                      style: TextStyle(
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.w600))
+                                  : Text('Fecha de llegada: Calculando...',
+                                      style: TextStyle(
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.w600)),
+                            ),
+                          ),
+                          Container(
+                            height: MediaQuery.of(context).size.height / 18,
+                            width: MediaQuery.of(context).size.width / 1.96,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                                border: Border.all(
+                                    color: Colors.black,
+                                    style: BorderStyle.solid)),
+                            child: Container(
+                                padding: EdgeInsets.all(8),
+                                child: hora != null &&
+                                        mins != null &&
+                                        secs != null
+                                    ? Text(
+                                        'Hora estimada: $hora:$mins:$secs  Hora Central',
                                         style: TextStyle(
                                             fontSize: 19,
                                             fontWeight: FontWeight.w600))
-                                    : Text('Fecha de llegada: Calculando...',
+                                    : Text('Hora estimada: Calculando.... ',
                                         style: TextStyle(
                                             fontSize: 19,
-                                            fontWeight: FontWeight.w600)),
-                              ),
-                            ),
-                            Container(
-                              height: MediaQuery.of(context).size.height / 18,
-                              width: MediaQuery.of(context).size.width / 1.96,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white,
-                                  border: Border.all(
-                                      color: Colors.black,
-                                      style: BorderStyle.solid)),
-                              child: Container(
-                                  padding: EdgeInsets.all(8),
-                                  child: hora != null &&
-                                          mins != null &&
-                                          secs != null
-                                      ? Text(
-                                          'Hora estimada: $hora:$mins:$secs  Hora Central',
-                                          style: TextStyle(
-                                              fontSize: 19,
-                                              fontWeight: FontWeight.w600))
-                                      : Text('Hora estimada: Calculando.... ',
-                                          style: TextStyle(
-                                              fontSize: 19,
-                                              fontWeight: FontWeight.w600))),
-                            ),
-                          ],
-                        ),
+                                            fontWeight: FontWeight.w600))),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
